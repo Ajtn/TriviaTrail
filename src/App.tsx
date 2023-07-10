@@ -1,0 +1,79 @@
+import Grid from './components/Grid'
+import './style/App.css'
+import { question } from './components/triviaTypes.types';
+
+function App() {
+  const questions: Array<question> = [
+    {
+      id: "asdasd",
+      questionText: "What is your name?",
+      answerText: "Arthur",
+      incorrectAnswers: ["fred", "bob", "bruce"],
+      difficulty: "easy",
+      category: "history"
+    },
+    {
+      id: "asdasdklasda",
+      questionText: "What is your quest?",
+      answerText: "To seek the holy grail!",
+      incorrectAnswers: ["To slay the black knight", "Say Ni!", "bruce"],
+      difficulty: "easy",
+      category: "history"
+    },
+    {
+      id: "a123jk",
+      questionText: "What is your favourite colour?",
+      answerText: "Yellow",
+      incorrectAnswers: ["Blue", "Peuce", "Burgundy", "Magenta"],
+      difficulty: "easy",
+      category: "history"
+    },
+    {
+      id: "3214hjkfd",
+      questionText: "What is your quest?",
+      answerText: "To seek the holy grail!",
+      incorrectAnswers: ["To slay the black knight", "Say Ni!", "bruce"],
+      difficulty: "easy",
+      category: "history"
+    },
+    {
+      id: "asdad343",
+      questionText: "What is your name?",
+      answerText: "Arthur",
+      incorrectAnswers: ["fred", "bob", "bruce"],
+      difficulty: "easy",
+      category: "General"
+    },
+    {
+      id: "4lfgy0",
+      questionText: "What is your quest?",
+      answerText: "To seek the holy grail!",
+      incorrectAnswers: ["To slay the black knight", "Say Ni!", "bruce"],
+      difficulty: "easy",
+      category: "Science"
+    },
+    {
+      id: "3490234jk",
+      questionText: "What is your quest?",
+      answerText: "To seek the holy grail!",
+      incorrectAnswers: ["To slay the black knight", "Say Ni!", "bruce"],
+      difficulty: "easy",
+      category: "history"
+    },
+    {
+      id: "12-30jk",
+      questionText: "What is your quest?",
+      answerText: "To seek the holy grail!",
+      incorrectAnswers: ["To slay the black knight", "Say Ni!", "bruce"],
+      difficulty: "easy",
+      category: "history"
+    }
+  ];
+  return (
+    <div className='gridContainer'>
+      <Grid questionData={questions}/>
+    </div>
+  )
+}
+
+export default App

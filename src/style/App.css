@@ -1,0 +1,126 @@
+/*
+  1. Use a more-intuitive box-sizing model.
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+/*
+  2. Remove default margin
+*/
+* {
+  margin: 0;
+}
+/*
+  Typographic tweaks!
+  3. Add accessible line-height
+  4. Improve text rendering
+*/
+body {
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+/*
+  5. Improve media defaults
+*/
+img, picture, video, canvas, svg {
+  display: block;
+  max-width: 100%;
+}
+/*
+  6. Remove built-in form typography styles
+*/
+input, button, textarea, select {
+  font: inherit;
+}
+/*
+  7. Avoid text overflows
+*/
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+/*
+  8. Create a root stacking context
+*/
+#root, #__next {
+  isolation: isolate;
+}
+
+
+h2 {
+  text-align: center;
+  color: rgb(72, 10, 131);
+}
+
+.hex-grid /*"main"*/ {
+  --s: 15vw;  /* size of a hexagon */
+  --m: 3px;    /* space between each heaxgon */
+  --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
+  display:flex;
+  background-color: rgb(43, 35, 63);
+}
+
+.grid-container > div {
+  position: relative;
+  width: var(--s);
+  height: calc(var(--s)*1.1547); 
+  margin: var(--m);
+  display: inline-block;
+  clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+  margin-bottom: calc(var(--m) - var(--s)*0.2885);
+  background-image: linear-gradient(to bottom right, rgb(54, 164, 164), rgb(51, 255, 0), rgb(175, 206, 152));
+  background-image: linear-gradient(to bottom right,rgb(201, 143, 201), rgb(70, 189, 189), rgba(155, 192, 127, 0.4), rgba(145, 183, 108, 0));
+}
+.grid-container > div:hover{
+  background-image: linear-gradient(to bottom right,rgb(201, 143, 201), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgba(145, 183, 108, 1));
+}
+.grid-container::before {
+  content: "";
+  width: calc(var(--s)/2 + var(--m));
+  float: left;
+  height: 100%;
+  shape-outside: repeating-linear-gradient(
+    transparent 0 calc(var(--r) - 3px),
+    #fff      0 var(--r)
+  );       
+}
+.grid-container > .big-hex {
+  --s: 43vw;
+  position: absolute;
+  top: 0;
+  left: 25vw;
+  background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79));
+}
+.grid-container > .big-hex:hover {
+  background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79))
+}
+
+.hex > h2 {
+  padding-top: 45%;
+}
+.big-hex > * {
+  text-align: center;
+}
+
+.big-hex > div.answers {
+  height: 25vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+div.answer {
+  width: 20%;
+  padding: 1px;
+  background-color: aquamarine;
+  border-radius: 10px;
+  align-self: center;
+}
+
+div.answer:hover {
+  background-color: rgb(45, 177, 133);
+  padding: 0;
+  border-style: solid;
+  border-width: 1px;
+  border-color:rgb(240, 222, 226)
+}
+
