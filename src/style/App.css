@@ -48,7 +48,8 @@ p, h1, h2, h3, h4, h5, h6 {
 div.app {
   background-color: rgb(43, 35, 63);
   height: 100vh;
-  align-self: center;
+  width: 100vw;
+  align-items: center;
 }
 
 h2 {

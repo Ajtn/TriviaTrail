@@ -10,12 +10,32 @@ import DetailedHex from "./DetailedHex";
         -hex state (answered, failed, inacessible, unanswered)
         -hex content (45)
 */
-export default function Grid(props: {windowWidth: number, questionData: Array<question>}) {
+export default function Grid(props: {windowWidth: number ,rowLength: number, questionData: Array<question>}) {
     const [hexGrid, setHexGrid] = useState(createGrid()),
     [activeQ, setactiveQ] = useState({visible: false, qData: {id: "", questionText:"", answerText: "", difficulty: "easy", category: ""} as question});
+    
+    function calculateAdjacentHexes(hexPos: {xPos: number, yPos: number}) {
+        const neighbors = [];
+        hexGrid.forEach(hex => {
+            if ((hex.position.xPos === hexPos.xPos - 1 || hex.position.xPos === hexPos.xPos + 1) && (hex.position.yPos === hexPos.yPos - 1 || hex.position.yPos === hexPos.yPos + 1)) {
+                neighbors.push(hex.id);
+            }
+        });
+    }
 
     function createGrid():Array<hexStatus> {
-        return props.questionData.map(q => ({...q, accessible: true, answered: "unanswered" as "unanswered", nextTo: []}));
+        let xPos = 0,
+        yPos = 0;
+        return props.questionData.map(q => {
+            const tempHex = {...q, position: {xPos: xPos, yPos: yPos}, accessible: true, answered: "unanswered" as "unanswered", nextTo: []};
+            if (xPos + 1 < props.rowLength) {
+                xPos++;
+            } else {
+                xPos = 0;
+                yPos++;
+            }
+            return tempHex;
+        });
     }
 
     function updateactiveQ (event: React.MouseEvent<HTMLDivElement, MouseEvent>) {

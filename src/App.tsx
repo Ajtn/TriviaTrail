@@ -159,7 +159,7 @@ function App() {
 
   return (
     <div className='app'>
-      <Grid windowWidth={windowWidth} questionData={questions}/>
+      <Grid windowWidth={windowWidth} rowLength={5} questionData={questions}/>
     </div>
   )
 }

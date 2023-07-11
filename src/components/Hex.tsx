@@ -2,6 +2,7 @@ import React from "react";
 
 export type hexStatus = {
     id: string;
+    position: {xPos: number, yPos: number};
     accessible: boolean;
     category: string;
     answered: "pass" | "fail" | "unanswered";
