@@ -48,11 +48,11 @@ p, h1, h2, h3, h4, h5, h6 {
 
 h2 {
   text-align: center;
-  color: rgb(72, 10, 131);
+  color: rgb(20, 4, 35);
 }
 
 .hex-grid /*"main"*/ {
-  --s: 15vw;  /* size of a hexagon */
+  --s: 300px;  /* size of a hexagon */
   --m: 3px;    /* space between each heaxgon */
   --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
   display:flex;
@@ -60,6 +60,7 @@ h2 {
 }
 
 .grid-container > div {
+  background-image: linear-gradient(to bottom right, rgba(14, 15, 15, 0.5), rgba(173, 226, 191, 0.4), rgba(112, 179, 167, 0.6), rgba(35, 39, 38, 0.7));
   position: relative;
   width: var(--s);
   height: calc(var(--s)*1.1547); 
@@ -67,11 +68,6 @@ h2 {
   display: inline-block;
   clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
   margin-bottom: calc(var(--m) - var(--s)*0.2885);
-  background-image: linear-gradient(to bottom right, rgb(54, 164, 164), rgb(51, 255, 0), rgb(175, 206, 152));
-  background-image: linear-gradient(to bottom right,rgb(201, 143, 201), rgb(70, 189, 189), rgba(155, 192, 127, 0.4), rgba(145, 183, 108, 0));
-}
-.grid-container > div:hover{
-  background-image: linear-gradient(to bottom right,rgb(201, 143, 201), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgba(145, 183, 108, 1));
 }
 .grid-container::before {
   content: "";
@@ -81,7 +77,7 @@ h2 {
   shape-outside: repeating-linear-gradient(
     transparent 0 calc(var(--r) - 3px),
     #fff      0 var(--r)
-  );       
+  );
 }
 .grid-container > .big-hex {
   --s: 43vw;
@@ -90,8 +86,29 @@ h2 {
   left: 25vw;
   background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79));
 }
+
+.grid-container > div:hover {
+  background-image: linear-gradient(to bottom right,rgba(201, 143, 201, 0.4), rgba(70, 189, 189, 1), rgba(155, 192, 127, 1), rgba(145, 183, 108, 0.4));
+}
+
+.grid-container > div.accessible {
+  background-image: linear-gradient(to bottom right,rgb(201, 143, 201), rgb(70, 189, 189), rgba(155, 192, 127, 0.4), rgba(145, 183, 108, 0));
+}
+
+.grid-container > div.fail {
+  background-image: linear-gradient(to bottom right,rgb(102, 65, 133),rgb(105, 31, 46), rgb(184, 91, 62), rgb(209, 46, 18));
+}
+
+.grid-container > div.pass {
+  background-image: linear-gradient(to bottom right,rgb(185, 180, 234),rgba(31, 64, 105, 0.8), rgba(23, 189, 48, 0.6), rgba(91, 170, 97, 0.9));
+}
+
+div.fail > h2, div.pass > h2 {
+  color: antiquewhite;
+}
+
 .grid-container > .big-hex:hover {
-  background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79))
+  background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgb(155, 192, 127), rgb(117, 156, 79))
 }
 
 .hex > h2 {

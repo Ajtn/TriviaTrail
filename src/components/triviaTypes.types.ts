@@ -1,8 +1,10 @@
+export type difficulty = "easy" |"medium" | "hard";
+
 export type question = {
    id: string;
    questionText: string;
    answerText: string;
    incorrectAnswers?: Array<string>;
-   difficulty: "easy" |"medium" | "hard";
+   difficulty: difficulty;
    category: string;
 }
