@@ -1,7 +1,6 @@
 import Grid from './components/Grid'
 import { useEffect, useState} from 'react';
 import './style/App.css'
-import { question } from './components/triviaTypes.types';
 
 function App() {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
@@ -19,7 +18,7 @@ function App() {
     setWindowWidth(window.innerWidth);
   }
 
-  const questions: Array<question> = [
+  const questions = [
     {
       id: "asdasd",
       questionText: "What is your name?",
@@ -159,7 +158,9 @@ function App() {
   ];
 
   return (
+    <div className='app'>
       <Grid windowWidth={windowWidth} questionData={questions}/>
+    </div>
   )
 }
 

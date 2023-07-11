@@ -45,18 +45,42 @@ p, h1, h2, h3, h4, h5, h6 {
   isolation: isolate;
 }
 
+div.app {
+  background-color: rgb(43, 35, 63);
+  height: 100vh;
+  align-self: center;
+}
 
 h2 {
+  size: 2rem;
   text-align: center;
   color: rgb(20, 4, 35);
 }
 
-.hex-grid /*"main"*/ {
-  --s: 300px;  /* size of a hexagon */
+.hex-grid.small {
+  width: 705px;
+  --s: 122px;  /* size of a hexagon */
   --m: 3px;    /* space between each heaxgon */
+  padding-bottom: 35px;
+}
+
+.hex-grid.medium {
+  width: 1040px;
+  --s: 183px;  /* size of a hexagon */
+  --m: 3px;    /* space between each heaxgon */
+  padding-bottom: 55px;
+}
+
+.hex-grid.large {
+  width: 1355px;
+  --s: 240px;  /* size of a hexagon */
+  --m: 3px;    /* space between each heaxgon */
+  padding-bottom: 70px;
+}
+
+.hex-grid {
   --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
   display:flex;
-  background-color: rgb(43, 35, 63);
 }
 
 .grid-container > div {
@@ -88,7 +112,7 @@ h2 {
 }
 
 .grid-container > div:hover {
-  background-image: linear-gradient(to bottom right,rgba(201, 143, 201, 0.4), rgba(70, 189, 189, 1), rgba(155, 192, 127, 1), rgba(145, 183, 108, 0.4));
+  background-image: linear-gradient(to bottom right,rgba(201, 143, 201, 0.4), rgba(70, 189, 189,  0.8), rgba(155, 192, 127, 0.8), rgba(145, 183, 108, 0.4));
 }
 
 .grid-container > div.accessible {
