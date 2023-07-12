@@ -52,7 +52,7 @@ function App() {
       category: "history"
     },
     {
-      id: "ffasd34tsdg g",
+      id: "ffasd34tsdg",
       questionText: "What is your name?",
       answerText: "Arthur",
       incorrectAnswers: ["fred", "bob", "bruce"],
@@ -159,7 +159,7 @@ function App() {
 
   return (
     <div className='app'>
-      <Grid windowWidth={windowWidth} rowLength={5} questionData={questions} startingHex={{xPos:2, yPos: 2}}/>
+      <Grid windowWidth={windowWidth} rowLength={5} startingHex={{xPos:1, yPos: 1}} api={{url: ""}}/>
     </div>
   )
 }

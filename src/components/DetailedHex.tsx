@@ -1,7 +1,7 @@
-import { question } from "./triviaTypes.types";
+import { hexStatus } from "./Hex";
 
 type DetailedHexProps = {
-    activeQ: {visible: boolean, qData: question};
+    activeQ: {visible: boolean, qData: hexStatus};
     handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
 };
 

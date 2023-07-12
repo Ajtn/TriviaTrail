@@ -1,19 +1,46 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Hex, { hexStatus } from "./Hex";
-import { question } from "./triviaTypes.types";
 import DetailedHex from "./DetailedHex";
 
 /*
     Grid needs to know:
         -Start point/endpoint 
-        -what connections between hexes
-        -hex state (answered, failed, inacessible, unanswered)
-        -hex content (45)
 */
-export default function Grid(props: {windowWidth: number ,rowLength: number, questionData: Array<question>, startingHex: {xPos: number, yPos: number}}) {
-    const [hexGrid, setHexGrid] = useState(createGrid()),
-    [activeQ, setactiveQ] = useState({visible: false, qData: {id: "", questionText:"", answerText: "", difficulty: "easy", category: ""} as question});
-    
+
+export type question = {
+    category: string;
+    id: string;
+    tags: Array<string>;
+    difficulty: string;
+    regions: Array<string>;
+    isNiche: boolean;
+    question: {text: string};
+    correctAnswer: string;
+    incorrectAnswers?: Array<string>;
+    type: string;
+ }
+
+export default function Grid(props: {windowWidth: number ,rowLength: number, startingHex: {xPos: number, yPos: number}, api: {url: string}}) {
+    const [questions, setQuestions] = useState<question[]>([{category: "", id: "", tags: [], difficulty: "", regions: [], isNiche: false, question: {text: ""}, correctAnswer: "", type: ""}]),
+    [hexGrid, setHexGrid] = useState<hexStatus[]>([]),
+    [activeQ, setactiveQ] = useState<{visible: boolean, qData: hexStatus}>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", answerText: "", difficulty: ""}});
+
+    useEffect(getTrivia, []);
+
+    function getTrivia() {
+        fetch(props.api.url)
+        .then(res => res.json())
+        .then(data => {
+            setQuestions(data);
+        });
+    }
+
+    useEffect(initHexGrid, [questions]);
+
+    function initHexGrid() {
+        setHexGrid(createGrid());
+    }
+
     function getNeighbors(hexPos: {xPos: number, yPos: number}) {
         const neighbors: Array<string> = [];
         hexGrid.forEach(hex => {
@@ -41,8 +68,19 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
     function createGrid():Array<hexStatus> {
         let xPos = 0,
         yPos = 0;
-        return props.questionData.map(q => {
-            const tempHex = {...q, position: {xPos: xPos, yPos: yPos}, accessible: false, answered: "unanswered" as "unanswered", nextTo: []};
+        return questions.map(q => {
+            const tempHex:hexStatus = {
+                id: q.id,
+                position: {xPos: xPos, yPos: yPos},
+                accessible: false,
+                category: q.category,
+                answered: "unanswered" as "unanswered",
+                questionText: q.question.text,
+                answerText: q.correctAnswer,
+                incorrectAnswers: q.incorrectAnswers ? q.incorrectAnswers : undefined,
+                difficulty: q.difficulty
+            }
+            //const tempHex = {...q, position: {xPos: xPos, yPos: yPos}, accessible: false, answered: "unanswered" as "unanswered", nextTo: []};
             if (xPos + 1 < props.rowLength) {
                 xPos++;
             } else {
@@ -52,6 +90,7 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
             if (tempHex.position.xPos === props.startingHex.xPos && tempHex.position.yPos === props.startingHex.yPos) {
                 tempHex.accessible = true;
             }
+
             return tempHex;
         });
     }
@@ -64,13 +103,10 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
         }
     }
 
-    //todo: add logic to change hex accessibility
     //finds current question and modifies it's answered value in state
     function answerClicked(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         const clickedA = event.currentTarget.outerText,
         clickedId = event.currentTarget.parentElement?.classList[1];
-
-        
 
         setHexGrid(oldGrid => oldGrid.map(hex => {
             if (hex.id === clickedId) {
@@ -85,7 +121,6 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
             }
         }));
         setactiveQ(oldQ => ({...oldQ, visible: false}));
-
     }
 
     function updateNeighbors(hexPos: {xPos: number, yPos: number}) {
@@ -109,6 +144,7 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
         gridScale = "large";
     }
 
+    console.log(hexGrid);
     return (
     <div className={`hex-grid ${gridScale}`}>
         <div className={`grid-container ${gridScale}`}>
