@@ -10,29 +10,47 @@ import DetailedHex from "./DetailedHex";
         -hex state (answered, failed, inacessible, unanswered)
         -hex content (45)
 */
-export default function Grid(props: {windowWidth: number ,rowLength: number, questionData: Array<question>}) {
+export default function Grid(props: {windowWidth: number ,rowLength: number, questionData: Array<question>, startingHex: {xPos: number, yPos: number}}) {
     const [hexGrid, setHexGrid] = useState(createGrid()),
     [activeQ, setactiveQ] = useState({visible: false, qData: {id: "", questionText:"", answerText: "", difficulty: "easy", category: ""} as question});
     
-    function calculateAdjacentHexes(hexPos: {xPos: number, yPos: number}) {
-        const neighbors = [];
+    function getNeighbors(hexPos: {xPos: number, yPos: number}) {
+        const neighbors: Array<string> = [];
         hexGrid.forEach(hex => {
-            if ((hex.position.xPos === hexPos.xPos - 1 || hex.position.xPos === hexPos.xPos + 1) && (hex.position.yPos === hexPos.yPos - 1 || hex.position.yPos === hexPos.yPos + 1)) {
-                neighbors.push(hex.id);
-            }
+            if (hex.position.yPos === hexPos.yPos) {
+                if (hex.position.xPos === hexPos.xPos + 1 || hex.position.xPos === hexPos.xPos - 1) {
+                    neighbors.push(hex.id);
+                }
+            } else if (hexPos.yPos % 2 === 0) {
+                if (hex.position.yPos === hexPos.yPos - 1 || hex.position.yPos === hexPos.yPos + 1) {
+                    if (hex.position.xPos === hexPos.xPos -1 || hex.position.xPos === hexPos.xPos) {
+                        neighbors.push(hex.id);
+                    }
+                }
+            } else {
+                if (hex.position.yPos === hexPos.yPos - 1 || hex.position.yPos === hexPos.yPos + 1) {
+                    if (hex.position.xPos === hexPos.xPos || hex.position.xPos === hexPos.xPos + 1) {
+                        neighbors.push(hex.id);
+                    }
+                }
+            } 
         });
+        return neighbors;
     }
 
     function createGrid():Array<hexStatus> {
         let xPos = 0,
         yPos = 0;
         return props.questionData.map(q => {
-            const tempHex = {...q, position: {xPos: xPos, yPos: yPos}, accessible: true, answered: "unanswered" as "unanswered", nextTo: []};
+            const tempHex = {...q, position: {xPos: xPos, yPos: yPos}, accessible: false, answered: "unanswered" as "unanswered", nextTo: []};
             if (xPos + 1 < props.rowLength) {
                 xPos++;
             } else {
                 xPos = 0;
                 yPos++;
+            }
+            if (tempHex.position.xPos === props.startingHex.xPos && tempHex.position.yPos === props.startingHex.yPos) {
+                tempHex.accessible = true;
             }
             return tempHex;
         });
@@ -51,9 +69,13 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
     function answerClicked(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         const clickedA = event.currentTarget.outerText,
         clickedId = event.currentTarget.parentElement?.classList[1];
+
+        
+
         setHexGrid(oldGrid => oldGrid.map(hex => {
             if (hex.id === clickedId) {
                 if (clickedA === activeQ.qData.answerText) {
+                    updateNeighbors(hex.position);
                     return {...hex, answered: "pass", accessible: false};
                 } else {
                     return {...hex, answered: "fail", accessible: false};
@@ -63,11 +85,24 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, que
             }
         }));
         setactiveQ(oldQ => ({...oldQ, visible: false}));
+
+    }
+
+    function updateNeighbors(hexPos: {xPos: number, yPos: number}) {
+        const neighbors = getNeighbors(hexPos);
+        setHexGrid(oldGrid => {
+            return oldGrid.map(hex => {
+                if (neighbors.includes(hex.id) && hex.answered === "unanswered") {
+                    return {...hex, accessible: true};
+                } else {
+                    return hex;
+                }
+            })
+        });
     }
 
     let gridScale = "small";
 
-    console.log(props.windowWidth);
     if (props.windowWidth > 900 && props.windowWidth < 1300) {
         gridScale = "medium";
     } else if (props.windowWidth > 1300) {

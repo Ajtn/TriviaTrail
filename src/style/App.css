@@ -85,7 +85,7 @@ h2 {
 }
 
 .grid-container > div {
-  background-image: linear-gradient(to bottom right, rgba(14, 15, 15, 0.5), rgba(173, 226, 191, 0.4), rgba(112, 179, 167, 0.6), rgba(35, 39, 38, 0.7));
+  background-image: linear-gradient(to bottom right, rgba(60, 128, 128, 0.5), rgba(162, 111, 158, 0.4), rgba(45, 77, 71, 0.6), rgba(60, 68, 66, 0.7));
   position: relative;
   width: var(--s);
   height: calc(var(--s)*1.1547); 
@@ -112,12 +112,12 @@ h2 {
   background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79));
 }
 
-.grid-container > div:hover {
-  background-image: linear-gradient(to bottom right,rgba(201, 143, 201, 0.4), rgba(70, 189, 189,  0.8), rgba(155, 192, 127, 0.8), rgba(145, 183, 108, 0.4));
+.grid-container > div.accessible:hover {
+  background-image: linear-gradient(to bottom right,rgb(225, 205, 225), rgb(70, 189, 189), rgb(155, 192, 127), rgb(197, 224, 170));
 }
 
 .grid-container > div.accessible {
-  background-image: linear-gradient(to bottom right,rgb(201, 143, 201), rgb(70, 189, 189), rgba(155, 192, 127, 0.4), rgba(145, 183, 108, 0));
+  background-image: linear-gradient(to bottom right,rgba(201, 143, 201, 0.4), rgba(70, 189, 189, 0.7), rgba(155, 192, 127, 0.8), rgba(145, 183, 108, 0));
 }
 
 .grid-container > div.fail {
@@ -125,7 +125,7 @@ h2 {
 }
 
 .grid-container > div.pass {
-  background-image: linear-gradient(to bottom right,rgb(185, 180, 234),rgba(31, 64, 105, 0.8), rgba(23, 189, 48, 0.6), rgba(91, 170, 97, 0.9));
+  background-image: linear-gradient(to bottom right,rgb(24, 144, 72),rgba(31, 64, 105, 0.8), rgba(23, 189, 48, 0.6), rgba(91, 170, 97, 0.9));
 }
 
 div.fail > h2, div.pass > h2 {

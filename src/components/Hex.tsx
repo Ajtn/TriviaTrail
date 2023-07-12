@@ -6,7 +6,6 @@ export type hexStatus = {
     accessible: boolean;
     category: string;
     answered: "pass" | "fail" | "unanswered";
-    nextTo: Array<string>;
     questionText: string;
     answerText: string;
     incorrectAnswers?: Array<string>;
