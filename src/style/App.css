@@ -54,38 +54,51 @@ div.app {
 
 h2 {
   font-size: 1rem;
+  max-width:80%;
+  max-height: 40%;
   text-align: center;
   color: rgb(20, 4, 35);
 }
 
-.hex-grid.small {
-  width: 705px;
-  --s: 122px;  /* size of a hexagon */
-  --m: 3px;    /* space between each heaxgon */
-  padding-bottom: 35px;
+p {
+  text-align: center;
+  font-size: 0.7rem;
 }
 
-div.small h2 {
-  font-size: 10px;
+
+.hex-grid.small {
+  width: 550px;
+  --s: 80px;  /* size of a hexagon */
+}
+.hex-grid.small > div{
+  max-width: 80;
 }
 
 .hex-grid.medium {
-  width: 1040px;
-  --s: 183px;  /* size of a hexagon */
-  --m: 3px;    /* space between each heaxgon */
-  padding-bottom: 55px;
+  width: 705px;
+  --s: 115px;  /* size of a hexagon */
+}
+
+div.small h2 {
+  font-size: 8px;
 }
 
 .hex-grid.large {
+  width: 1040px;
+  --s: 170px;  /* size of a hexagon */
+}
+
+.hex-grid.xLarge {
   width: 1355px;
-  --s: 240px;  /* size of a hexagon */
-  --m: 3px;    /* space between each heaxgon */
-  padding-bottom: 70px;
+  --s: 220px;  /* size of a hexagon */
 }
 
 .hex-grid {
+  --m: 6px; 
   --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
   display:flex;
+  margin: auto;
+  padding-top: 8vh;
 }
 
 .grid-container > div {
@@ -117,7 +130,7 @@ div.small h2 {
 }
 
 .grid-container > div.accessible:hover {
-  background-image: linear-gradient(to bottom right,rgb(225, 205, 225), rgb(70, 189, 189), rgb(155, 192, 127), rgb(197, 224, 170));
+  background-image: linear-gradient(to bottom right,rgb(225, 205, 225), rgba(70, 189, 189, 0.6), rgba(155, 192, 127, 0.5), rgb(197, 224, 170));
 }
 
 .grid-container > div.accessible {
@@ -141,7 +154,7 @@ div.fail > h2, div.pass > h2 {
 }
 
 .hex > h2 {
-  padding-top: 45%;
+  padding-top: 30%;
 }
 .big-hex > * {
   text-align: center;

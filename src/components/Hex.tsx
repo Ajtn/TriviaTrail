@@ -1,8 +1,9 @@
 import React from "react";
+import { position } from "./Grid";
 
 export type hexStatus = {
     id: string;
-    position: {xPos: number, yPos: number};
+    position: position;
     accessible: boolean;
     category: string;
     answered: "pass" | "fail" | "unanswered";
@@ -17,6 +18,7 @@ export default function Hex(props: {hexState: hexStatus, handleClick: (event: Re
     return (
         <div className={`hex ${props.hexState.id} ${props.hexState.answered} ${props.hexState.accessible && "accessible"}`} onMouseDown={props.handleClick}>
             <h2 className="hex-category-text">{props.hexState.category}</h2>
+            {props.hexState.answered === "fail" && <p>Correct answer: {props.hexState.answerText}</p>}
         </div>
     )
 }
