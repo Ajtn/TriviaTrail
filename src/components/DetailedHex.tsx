@@ -9,7 +9,7 @@ export default function DetailedHex(props: DetailedHexProps) {
     let answers: Array<string>= [];
     if (props.activeQ.qData.incorrectAnswers) {
         props.activeQ.qData.incorrectAnswers.forEach(fAnswer => answers.push(fAnswer));
-        answers.push(props.activeQ.qData.answerText);
+        answers.push(props.activeQ.qData.correctAnswer);
         answers.sort(() => 0.5 - Math.random());
     } else {
         answers.splice(0, 0 ,"True", "False");

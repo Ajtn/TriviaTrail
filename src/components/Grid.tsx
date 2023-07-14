@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Hex, { hexStatus } from "./Hex";
 import DetailedHex from "./DetailedHex";
 
@@ -7,35 +7,28 @@ import DetailedHex from "./DetailedHex";
         -Start point/endpoint 
 */
 
-// export type question = {
-//     category: string;
-//     id: string;
-//     tags: Array<string>;
-//     difficulty: string;
-//     regions: Array<string>;
-//     isNiche: boolean;
-//     question: {text: string};
-//     correctAnswer: string;
-//     incorrectAnswers?: Array<string>;
-//     type: string;
-//  }
 type question = {
     category: string;
-    type: string;
+    id: string;
+    tags: Array<string>;
     difficulty: string;
-    question: string;
-    correct_answer: string;
-    incorrect_answers: Array<string>; 
-}
+    regions: Array<string>;
+    isNiche: boolean;
+    question: {text: string};
+    correctAnswer: string;
+    incorrectAnswers?: Array<string>;
+    type: string;
+ }
 
 interface headers {
     [key: string]: string;
 }
 
 type apiConfig = {
-    url: string;
+    baseUrl: string;
     method: string;
     headers: headers;
+    urlParams: Array<string>;
 }
 
 export type position = {
@@ -43,25 +36,58 @@ export type position = {
     yPos: number;
 }
 
-export default function Grid(props: {windowWidth: number ,rowLength: number, startingHex: position, endHexes:Array<position> ,api: apiConfig}) {
+/*
+    todo:
+        -Toolbar for modifying apiParameters
+            -difficulty
+            -grid size
+            -category (check if free api works here)
+*/
+
+export default function Grid(props: {windowWidth: number ,rowLength: number, hexOffset: number, startingHex: position, endHexes:Array<position> ,api: apiConfig}) {
     const [questions, setQuestions] = useState<question[]>([]),
+    [apiParameters, setApiParameters] = useState(props.api.urlParams),
     [hexGrid, setHexGrid] = useState<hexStatus[]>([]),
-    [activeQ, setactiveQ] = useState<{visible: boolean, qData: hexStatus}>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", answerText: "", difficulty: ""}});
+    [activeQ, setactiveQ] = useState<{visible: boolean, qData: hexStatus}>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
+
+    const gridRef = useRef(null);
 
     useEffect(getTrivia, []);
 
     function getTrivia() {
-        // fetch(props.api.url, {
-        //     method: props.api.method,
-        //     headers: props.api.headers
-        // })
-        // .then(res => res.json())
-        // .then(data => {
-        //     setQuestions(data.results);
-        // });
+        const url = apiParameters.length > 0 ? props.api.baseUrl + "?" + apiParameters.map(param => param + "&") : props.api.baseUrl;
+        fetch(url, {
+            method: props.api.method,
+            headers: props.api.headers
+        })
+        .then(res => res.json())
+        .then(data => {
+            setQuestions(data);
+        });
     }
 
     useEffect(initHexGrid, [questions]);
+
+    function setGridScale() {
+        let gridWidth = 550,
+        hexSize = 80;
+        if (props.windowWidth > 1900) {
+            gridWidth = 1000;
+            hexSize = 160;
+        } else if (props.windowWidth > 1400) {
+            gridWidth = 800;
+            hexSize = 130;
+            console.log("size");
+        } else if (props.windowWidth > 900) {
+            gridWidth = 700;
+            hexSize = 110;
+        }
+        // gridRef.current.style.setProperty('width', `${gridWidth}px`);
+        // gridRef.current.style.setProperty('--s', `${hexSize}px`);
+        // console.log(gridRef);
+    }
+
+    setGridScale();
 
     function initHexGrid() {
         setHexGrid(createGrid());
@@ -93,23 +119,15 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, sta
         return neighbors;
     }
 
+    function formatString(inputText: string) {
+        return inputText.replaceAll("_", " ");
+    }
+
     function createGrid():Array<hexStatus> {
         let xPos = 0,
-        yPos = 0,
-        id = 0;
+        yPos = 0;
         return questions.map(q => {
-            const tempHex:hexStatus = {
-                id: String(id),
-                position: {xPos: xPos, yPos: yPos},
-                accessible: false,
-                category: q.category,
-                answered: "unanswered" as "unanswered",
-                questionText: q.question,
-                answerText: q.correct_answer,
-                incorrectAnswers: q.incorrect_answers,
-                difficulty: q.difficulty
-            }
-            //const tempHex = {...q, position: {xPos: xPos, yPos: yPos}, accessible: false, answered: "unanswered" as "unanswered", nextTo: []};
+            const tempHex: hexStatus = {...q, questionText: q.question.text, category: formatString(q.category), position: {xPos: xPos, yPos: yPos}, accessible: false, answered: "unanswered" as "unanswered"}
             if (xPos + 1 < props.rowLength) {
                 xPos++;
             } else {
@@ -119,7 +137,6 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, sta
             if (tempHex.position.xPos === props.startingHex.xPos && tempHex.position.yPos === props.startingHex.yPos) {
                 tempHex.accessible = true;
             }
-            id++;
             return tempHex;
         });
     }
@@ -139,7 +156,7 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, sta
 
         setHexGrid(oldGrid => oldGrid.map(hex => {
             if (hex.id === clickedId) {
-                if (clickedA === activeQ.qData.answerText) {
+                if (clickedA === activeQ.qData.correctAnswer) {
                     if (props.endHexes.some(endPos => (endPos.xPos === activeQ.qData.position.xPos && endPos.yPos === activeQ.qData.position.yPos))) {
                         console.log("You win!");
                     }
@@ -177,7 +194,7 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, sta
     }
 
     return (
-    <div className={`hex-grid ${gridScale}`}>
+    <div className={`hex-grid ${gridScale}`} ref={gridRef}>
         <div className={`grid-container ${gridScale}`}>
             {hexGrid.map(hex => <Hex key={hex.id} hexState={hex} handleClick={updateactiveQ}/>)}
             <DetailedHex activeQ={activeQ} handleClick={answerClicked} />

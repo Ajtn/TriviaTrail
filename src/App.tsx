@@ -20,12 +20,13 @@ function App() {
 
 
   //https://the-trivia-api.com/v2/questions
-  //{'limit': "25", 'difficulties': "easy", 'types': "text_choice"}
+  //https://opentdb.com/api.php
+  //params: "limit", "categories", "difficulties", "region", "tags", "types",
 
-  const apiDetails = {url: "https://opentdb.com/api.php?amount=25&difficulty=easy", method: "GET", headers: {}};
+  const apiDetails = {baseUrl: "", method: "GET", headers: {}, urlParams: ["limit=25", "difficulties=easy"]};
   return (
     <div className='app'>
-      <Grid windowWidth={windowWidth} rowLength={5} startingHex={{xPos:2, yPos: 2}} endHexes={[{xPos: 0, yPos: 0}, {xPos: 4, yPos: 0}, {xPos: 0, yPos: 4}, {xPos: 4, yPos: 4}]} api={apiDetails}/>
+      <Grid windowWidth={windowWidth} rowLength={5} hexOffset={5} startingHex={{xPos:2, yPos: 2}} endHexes={[{xPos: 0, yPos: 0}, {xPos: 4, yPos: 0}, {xPos: 0, yPos: 4}, {xPos: 4, yPos: 4}]} api={apiDetails}/>
     </div>
   )
 }

@@ -47,15 +47,13 @@ p, h1, h2, h3, h4, h5, h6 {
 
 div.app {
   background-color: rgb(43, 35, 63);
-  height: 100vh;
+  height: 100%;
   width: 100vw;
   align-items: center;
 }
 
 h2 {
   font-size: 1rem;
-  max-width:80%;
-  max-height: 40%;
   text-align: center;
   color: rgb(20, 4, 35);
 }
@@ -68,7 +66,7 @@ p {
 
 .hex-grid.small {
   width: 550px;
-  --s: 80px;  /* size of a hexagon */
+  --s: 80px;
 }
 .hex-grid.small > div{
   max-width: 80;
@@ -76,29 +74,34 @@ p {
 
 .hex-grid.medium {
   width: 705px;
-  --s: 115px;  /* size of a hexagon */
+  --s: 115px;  
 }
 
-div.small h2 {
-  font-size: 8px;
-}
 
 .hex-grid.large {
-  width: 1040px;
-  --s: 170px;  /* size of a hexagon */
+  width: 1200px;
+  height: 1200px;
+  --s: 200px;
 }
 
 .hex-grid.xLarge {
   width: 1355px;
-  --s: 220px;  /* size of a hexagon */
+  --s: 220px;  
 }
 
+
 .hex-grid {
+  --f: 10px;
   --m: 6px; 
   --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
   display:flex;
   margin: auto;
   padding-top: 8vh;
+}
+
+h2.hex-category-text {
+  font-size: var(--f);
+  margin: auto;
 }
 
 .grid-container > div {
@@ -109,6 +112,7 @@ div.small h2 {
   margin: var(--m);
   display: inline-block;
   clip-path: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
+  shape-outside: polygon(0% 25%, 0% 75%, 50% 100%, 100% 75%, 100% 25%, 50% 0%);
   margin-bottom: calc(var(--m) - var(--s)*0.2885);
 }
 .grid-container::before {
@@ -130,11 +134,11 @@ div.small h2 {
 }
 
 .grid-container > div.accessible:hover {
-  background-image: linear-gradient(to bottom right,rgb(225, 205, 225), rgba(70, 189, 189, 0.6), rgba(155, 192, 127, 0.5), rgb(197, 224, 170));
+  background-image: linear-gradient(to bottom right,rgba(224, 215, 89, 0.8), rgba(70, 189, 189, 0.7), rgba(137, 219, 74, 0.8));
 }
 
 .grid-container > div.accessible {
-  background-image: linear-gradient(to bottom right,rgba(201, 143, 201, 0.4), rgba(70, 189, 189, 0.7), rgba(155, 192, 127, 0.8), rgba(145, 183, 108, 0));
+  background-image: linear-gradient(to bottom right, rgba(70, 110, 179, 0.8), rgba(127, 188, 192, 0.8));
 }
 
 .grid-container > div.fail {
@@ -142,28 +146,30 @@ div.small h2 {
 }
 
 .grid-container > div.pass {
-  background-image: linear-gradient(to bottom right,rgb(24, 144, 72),rgba(31, 64, 105, 0.8), rgba(23, 189, 48, 0.6), rgba(91, 170, 97, 0.9));
+  background-image: linear-gradient(to bottom right,rgb(24, 144, 72),rgba(31, 64, 105, 0.8), rgba(23, 189, 48, 0.6));
 }
 
 div.fail > h2, div.pass > h2 {
   color: antiquewhite;
 }
 
-.grid-container > .big-hex:hover {
-  background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgb(155, 192, 127), rgb(117, 156, 79))
-}
-
 .hex > h2 {
   padding-top: 30%;
+  font-size: var(--f);
+  max-height: 2px;
 }
-.big-hex > * {
-  text-align: center;
+
+.big-hex > h2 {
+  margin: auto;
+  font-size: calc(var(--f) * 2);
 }
 
 .big-hex > div.answers {
+  padding-top: 2%;
   height: 25vh;
   display: flex;
   flex-direction: column;
+  text-align: center;
   justify-content: space-evenly;
 }
 
@@ -172,7 +178,7 @@ div.answer {
   padding: 1px;
   background-color: aquamarine;
   border-radius: 10px;
-  align-self: center;
+  margin: auto;
 }
 
 div.answer:hover {
