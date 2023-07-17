@@ -17,7 +17,7 @@ export default function Hex(props: {hexState: hexStatus, handleClick: (event: Re
 
     return (
         <div className={`hex ${props.hexState.id} ${props.hexState.answered} ${props.hexState.accessible && "accessible"}`} onMouseDown={props.handleClick}>
-            <h2 className="hex-category-text">{props.hexState.answered === "fail"? `Correct asnwer: ${props.hexState.correctAnswer}` : props.hexState.category}</h2>
+            <h2 className="hex-category-text">{props.hexState.category}</h2>
         </div>
     )
 }

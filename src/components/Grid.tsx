@@ -1,11 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Hex, { hexStatus } from "./Hex";
 import DetailedHex from "./DetailedHex";
-
-/*
-    Grid needs to know:
-        -Start point/endpoint 
-*/
 
 type question = {
     category: string;
@@ -18,7 +13,12 @@ type question = {
     correctAnswer: string;
     incorrectAnswers?: Array<string>;
     type: string;
- }
+}
+
+export type activeQ = {
+    visible: boolean;
+    qData: hexStatus;
+}
 
 interface headers {
     [key: string]: string;
@@ -36,6 +36,8 @@ export type position = {
     yPos: number;
 }
 
+type winState = "won" | "lose" | "ongoing"
+
 /*
     todo:
         -Toolbar for modifying apiParameters
@@ -45,12 +47,16 @@ export type position = {
 */
 
 export default function Grid(props: {windowWidth: number ,rowLength: number, hexOffset: number, startingHex: position, endHexes:Array<position> ,api: apiConfig}) {
+    //Questiondata direct from API
     const [questions, setQuestions] = useState<question[]>([]),
+    //User defined parameters to modify API call to specific question types (not implemented)
     [apiParameters, setApiParameters] = useState(props.api.urlParams),
+    //winState to check if the game is still going
+    [winState, setWinstate] = useState<winState>("ongoing"),
+    //Array to track state of all hexes and their question data
     [hexGrid, setHexGrid] = useState<hexStatus[]>([]),
-    [activeQ, setactiveQ] = useState<{visible: boolean, qData: hexStatus}>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
-
-    const gridRef = useRef(null);
+    //Currently selected question and whether it's visible in pop up big hex
+    [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
 
     useEffect(getTrivia, []);
 
@@ -68,33 +74,23 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
 
     useEffect(initHexGrid, [questions]);
 
-    function setGridScale() {
-        let gridWidth = 550,
-        hexSize = 80;
-        if (props.windowWidth > 1900) {
-            gridWidth = 1000;
-            hexSize = 160;
-        } else if (props.windowWidth > 1400) {
-            gridWidth = 800;
-            hexSize = 130;
-            console.log("size");
-        } else if (props.windowWidth > 900) {
-            gridWidth = 700;
-            hexSize = 110;
-        }
-        // gridRef.current.style.setProperty('width', `${gridWidth}px`);
-        // gridRef.current.style.setProperty('--s', `${hexSize}px`);
-        // console.log(gridRef);
-    }
-
-    setGridScale();
 
     function initHexGrid() {
         setHexGrid(createGrid());
+        setactiveQ({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
     }
 
-    console.log(props.windowWidth);
+    function resetApp() {
+        getTrivia();
+        setWinstate("ongoing");
+    }
 
+    function keepPlaying() {
+        setactiveQ(oldActive => ({...oldActive, visible: false}));
+        setWinstate("ongoing");
+    }
+
+    //calculates hexes adjacent to active hex to modify accessibility
     function getNeighbors(hexPos: {xPos: number, yPos: number}) {
         const neighbors: Array<string> = [];
         hexGrid.forEach(hex => {
@@ -123,6 +119,7 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
         return inputText.replaceAll("_", " ");
     }
 
+    //populates hexgrid with hexState data, associating each hex with a question
     function createGrid():Array<hexStatus> {
         let xPos = 0,
         yPos = 0;
@@ -158,20 +155,24 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
             if (hex.id === clickedId) {
                 if (clickedA === activeQ.qData.correctAnswer) {
                     if (props.endHexes.some(endPos => (endPos.xPos === activeQ.qData.position.xPos && endPos.yPos === activeQ.qData.position.yPos))) {
-                        console.log("You win!");
+                        setWinstate("won");
+                    } else {
+                        setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "pass"}}));
                     }
                     updateNeighbors(hex.position);
                     return {...hex, answered: "pass", accessible: false};
                 } else {
+                    setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "fail"}}))
                     return {...hex, answered: "fail", accessible: false};
                 }
             } else {
                 return hex;
             }
         }));
-        setactiveQ(oldQ => ({...oldQ, visible: false}));
+        setTimeout(() => {setactiveQ(oldQ => ({...oldQ, visible: false}))}, 1000);
     }
 
+    //modifies acessibility of hexes adjacent to position of parameter
     function updateNeighbors(hexPos: {xPos: number, yPos: number}) {
         const neighbors = getNeighbors(hexPos);
         setHexGrid(oldGrid => {
@@ -185,19 +186,20 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
         });
     }
 
-    let gridScale = "small";
+    let gridScale = "large";
 
-    if (props.windowWidth > 900 && props.windowWidth < 1300) {
-        gridScale = "medium";
-    } else if (props.windowWidth > 1300) {
-        gridScale = "large";
-    }
+    //Determines classname to be appended to modify which CSS will be applied
+    // if (props.windowWidth > 900 && props.windowWidth < 1300) {
+    //     gridScale = "medium";
+    // } else if (props.windowWidth > 1300) {
+    //     gridScale = "large";
+    // }
 
     return (
-    <div className={`hex-grid ${gridScale}`} ref={gridRef}>
+    <div className={`hex-grid ${gridScale}`}>
         <div className={`grid-container ${gridScale}`}>
             {hexGrid.map(hex => <Hex key={hex.id} hexState={hex} handleClick={updateactiveQ}/>)}
-            <DetailedHex activeQ={activeQ} handleClick={answerClicked} />
+            <DetailedHex activeQ={activeQ} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying}/>
         </div>        
     </div>)
 }

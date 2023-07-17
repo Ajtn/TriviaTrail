@@ -79,9 +79,9 @@ p {
 
 
 .hex-grid.large {
-  width: 1200px;
+  width: 1100px;
   height: 1200px;
-  --s: 200px;
+  --s: 180px;
 }
 
 .hex-grid.xLarge {
@@ -96,7 +96,7 @@ p {
   --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
   display:flex;
   margin: auto;
-  padding-top: 8vh;
+  padding-top: 5vh;
 }
 
 h2.hex-category-text {
@@ -164,8 +164,8 @@ div.fail > h2, div.pass > h2 {
   font-size: calc(var(--f) * 2);
 }
 
-.big-hex > div.answers {
-  padding-top: 2%;
+.big-hex > div {
+  margin-top: 10%;
   height: 25vh;
   display: flex;
   flex-direction: column;
@@ -173,17 +173,22 @@ div.fail > h2, div.pass > h2 {
   justify-content: space-evenly;
 }
 
-div.answer {
-  width: 20%;
-  padding: 1px;
+p.answer-splash {
+  font: inherit;
+  color: rgb(27, 41, 190);
+}
+
+div.response {
+  padding: 3px;
   background-color: aquamarine;
   border-radius: 10px;
   margin: auto;
+  min-width: 8vw;
 }
 
-div.answer:hover {
+div.response:hover {
   background-color: rgb(45, 177, 133);
-  padding: 0;
+  padding: 2px;
   border-style: solid;
   border-width: 1px;
   border-color:rgb(240, 222, 226)

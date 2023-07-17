@@ -1,28 +1,50 @@
-import { hexStatus } from "./Hex";
+import { activeQ } from "./Grid";
 
 type DetailedHexProps = {
-    activeQ: {visible: boolean, qData: hexStatus};
+    activeQ: activeQ;
     handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
+    winState: string;
+    handleReset: () => void;
+    handleClose: () => void;
 };
 
 export default function DetailedHex(props: DetailedHexProps) {
+    const {qData: qData, visible: visible} = props.activeQ;
     let answers: Array<string>= [];
-    if (props.activeQ.qData.incorrectAnswers) {
-        props.activeQ.qData.incorrectAnswers.forEach(fAnswer => answers.push(fAnswer));
-        answers.push(props.activeQ.qData.correctAnswer);
+
+    if (qData.incorrectAnswers) {
+        qData.incorrectAnswers.forEach(fAnswer => answers.push(fAnswer));
+        answers.push(qData.correctAnswer);
         answers.sort(() => 0.5 - Math.random());
     } else {
         answers.splice(0, 0 ,"True", "False");
     }
     
-    return (
-        <>
-            {props.activeQ.visible && <div className="hex big-hex">
-                <h2 className="hex-question-text">{props.activeQ.qData.questionText}</h2>
-                <div className={`answers ${props.activeQ.qData.id}`}>
-                    {answers.map(answer => <div key={answer} onMouseDown={props.handleClick} className={`answer ${answer}`}>{answer}</div>)}
-                </div>
-        </div>}
-        </>
-    )
+
+    if (props.winState !== "ongoing") {
+        return (<div className="hex big-hex">
+            <h2 className="game-over-h2">{props.winState === "won" ? "You win!" : "Woops, nowhere to go..."}</h2>
+            <div className="restart-menu">
+                <p>New game?</p>
+                <div onClick={props.handleReset} className="response restart yes">Yes</div>
+                <div onClick={props.handleClose} className="response restart no">No</div>
+            </div>
+        </div>)
+    } else if (visible) {
+        let innerJsx = (<></>);
+        if (qData.answered === "unanswered") {
+            innerJsx = (<div className={`answers ${qData.id}`}>
+                {answers.map(answer => <div key={answer} onMouseDown={props.handleClick} className={`response answer ${answer}`}>{answer}</div>)}
+            </div>)
+        } else {
+            const solution = qData.answered === "pass" ? "Correct answer!" : <>The correct answer was: <p className="answer-splash">{qData.correctAnswer}</p></>
+            innerJsx = <div className={`answer-splash ${qData.answered}`}>{solution}</div>;
+        }
+        return (<div className="hex big-hex">
+            <h2 className="hex-question-text">{qData.questionText}</h2>
+            {innerJsx}
+        </div>)
+    } else {
+        return <></>
+    }
 }
