@@ -50,7 +50,7 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
     //Questiondata direct from API
     const [questions, setQuestions] = useState<question[]>([]),
     //User defined parameters to modify API call to specific question types (not implemented)
-    [apiParameters, setApiParameters] = useState(props.api.urlParams),
+    //[apiParameters, setApiParameters] = useState(props.api.urlParams),
     //winState to check if the game is still going
     [winState, setWinstate] = useState<winState>("ongoing"),
     //Array to track state of all hexes and their question data
@@ -59,9 +59,12 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
     [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
 
     useEffect(getTrivia, []);
+    useEffect(initHexGrid, [questions]);
+    useEffect(checkFailState, [hexGrid]);
 
     function getTrivia() {
-        const url = apiParameters.length > 0 ? props.api.baseUrl + "?" + apiParameters.map(param => param + "&") : props.api.baseUrl;
+        //const url = apiParameters.length > 0 ? props.api.baseUrl + "?" + apiParameters.map(param => param + "&") : props.api.baseUrl;
+        const url = props.api.urlParams.length > 0 ? props.api.baseUrl + "?" + props.api.urlParams.map(param => param + "&") : props.api.baseUrl;
         fetch(url, {
             method: props.api.method,
             headers: props.api.headers
@@ -72,8 +75,11 @@ export default function Grid(props: {windowWidth: number ,rowLength: number, hex
         });
     }
 
-    useEffect(initHexGrid, [questions]);
-
+    function checkFailState() {
+        if (hexGrid.length > 1 && ! hexGrid.some((hex => hex.accessible))) {
+            setWinstate("lose");
+        }
+    }
 
     function initHexGrid() {
         setHexGrid(createGrid());
