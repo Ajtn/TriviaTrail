@@ -47,9 +47,8 @@ p, h1, h2, h3, h4, h5, h6 {
 
 div.app {
   background-color: rgb(43, 35, 63);
-  height: 100%;
-  width: 100vw;
   align-items: center;
+  height: 100vh;
 }
 
 h2 {
@@ -80,8 +79,7 @@ p {
 
 .hex-grid.large {
   width: 1100px;
-  height: 1200px;
-  --s: 180px;
+  --s: 185px;
 }
 
 .hex-grid.xLarge {
@@ -96,7 +94,7 @@ p {
   --r: calc(var(--s)*3*1.1547/2 + 4*var(--m));
   display:flex;
   margin: auto;
-  padding-top: 5vh;
+  padding-top: 3vh;
 }
 
 h2.hex-category-text {
@@ -106,7 +104,6 @@ h2.hex-category-text {
 
 .grid-container > div {
   background-image: linear-gradient(to bottom right, rgba(60, 128, 128, 0.5), rgba(162, 111, 158, 0.4), rgba(45, 77, 71, 0.6), rgba(60, 68, 66, 0.7));
-  position: relative;
   width: var(--s);
   height: calc(var(--s)*1.1547); 
   margin: var(--m);
@@ -183,7 +180,7 @@ div.response {
   background-color: aquamarine;
   border-radius: 10px;
   margin: auto;
-  min-width: 8vw;
+  min-width: vw;
 }
 
 div.response:hover {
