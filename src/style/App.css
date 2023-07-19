@@ -41,12 +41,14 @@ p, h1, h2, h3, h4, h5, h6 {
 /*
   8. Create a root stacking context
 */
-#root, #__next {
+#root {
   isolation: isolate;
+  background-color: rgb(43, 35, 63);
+  height: 100%;
+  width: 100%;
 }
 
 div.app {
-  background-color: rgb(43, 35, 63);
   align-items: center;
   height: 100vh;
 }
@@ -78,6 +80,8 @@ p {
 
 
 .hex-grid.large {
+  background-color: rgb(43, 35, 63);
+  padding-bottom: 65px;
   width: 1100px;
   --s: 185px;
 }
@@ -123,10 +127,11 @@ h2.hex-category-text {
   );
 }
 .grid-container > .big-hex {
-  --s: 43vw;
+  --s: 800px;
+  margin: auto;
   position: absolute;
-  top: 0;
-  left: 25vw;
+  top: 2%;
+  left: calc(50vw - 400px);
   background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79));
 }
 
@@ -180,7 +185,7 @@ div.response {
   background-color: aquamarine;
   border-radius: 10px;
   margin: auto;
-  min-width: vw;
+  min-width: 3vw;
 }
 
 div.response:hover {
