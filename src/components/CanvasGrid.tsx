@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, MouseEventHandler, EventHandler } from "react";
+import "../utility/hexUtility"; 
 import { hexStatus } from "./Hex";
 import DetailedHex from "./DetailedHex";
 import '../style/canvasStyle.css';
 import { testHexes } from "../assets/demoQs";
+import { calcHexScale, checkAdjacent, formatString, getGridX, getHexCoords, getTextOffset, pointInsideHex } from "../utility/hexUtility";
 
 type question = {
     category: string;
@@ -34,13 +36,20 @@ export type position = {
     yPos: number;
 }
 
+export type hexScale = {
+    hexSideLength: number;
+    hexOffset: number;
+    fontSize: number;
+    canvasOffset: {x: number, y: number};
+}
+
 type winState = "won" | "lose" | "ongoing"
 
 
 export default function CanvasGrid(props: {rowLength: number, startingHexes: Array<position>, endHexes:Array<position> ,api: apiConfig}) {
 
     const [windowSize, setWindowWidth] = useState({width: window.innerWidth, height: window.innerHeight});
-    const [hexScale, setHexScale] = useState(calcHexScale);
+    const [hexScale, setHexScale] = useState(calcHexScale(windowSize, props.rowLength));
     //Questiondata direct from API
     const [questions, setQuestions] = useState<question[]>([]),
     //User defined parameters to modify API call to specific question types (not implemented)
@@ -49,6 +58,7 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
     [winState, setWinstate] = useState<winState>("ongoing"),
     //Array to track state of all hexes and their question data
     [hexGrid, setHexGrid] = useState<hexStatus[]>([]),
+    [mouseOnHex, setMouseOnHex] = useState<hexStatus | undefined>(),
     //Currently selected question and whether it's visible in pop up big hex
     [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
 
@@ -57,7 +67,9 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
     useEffect(checkFailState, [hexGrid]);
     useEffect(initResizeListener, [windowSize]);
     useEffect(updateHexScale, [windowSize]);
-    useEffect(drawGrid, [hexGrid, hexScale]);
+    useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex]);
+    useEffect(initMouseMoveListener, []);
+    useEffect(initMouseClickListener, []);
 
     const canvRef = useRef<HTMLCanvasElement>(null);
 
@@ -69,9 +81,65 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
             context.clearRect(0, 0, windowSize.width, windowSize.height);
             // testHexes.forEach(hex => drawHex(context, hex));
             hexGrid.forEach(hex => drawHex(context, hex));
+            if (mouseOnHex) {
+                drawHex(context, mouseOnHex, "#e4f118");
+            }
         }
     }
 
+    function initMouseMoveListener() {
+        window.addEventListener('mousemove', handleMouseMove);
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove)
+        }
+    }
+
+    function  handleMouseMove(event: MouseEvent) {
+        const hoverPos = {x: event.clientX, y: event.clientY};
+        const xGrid = getGridX(hoverPos.x, hexScale);
+        const xAlignedHexes: Array<hexStatus> = [];
+
+        hexGrid.forEach(hex => {
+            if (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1) {
+                xAlignedHexes.push(hex);
+            }
+        });
+
+        const hoverHex = xAlignedHexes.find(hex => {
+            const hexCoord = getHexCoords(hex.position, hexScale);
+            return pointInsideHex(hexCoord, hexScale.hexSideLength, hoverPos)
+        });
+        setMouseOnHex(hoverHex);
+    }
+    
+    function initMouseClickListener() {
+        window.addEventListener('mousedown', handleMouseClick);
+        return () => {
+            window.removeEventListener('mousedown', handleMouseClick)
+        }
+    }
+
+    function handleMouseClick(event: MouseEvent) {
+        //setExtraHex({xPos: event.clientX, yPos: event.clientY});
+        const clickPos = {x: event.clientX, y: event.clientY};
+        const xGrid = getGridX(clickPos.x, hexScale);
+        const xAlignedHexes: Array<hexStatus> = [];
+
+        hexGrid.forEach(hex => {
+            if (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1) {
+                xAlignedHexes.push(hex);
+            }
+        });
+
+        console.log(xAlignedHexes);
+        const clickedHex = xAlignedHexes.find(hex => {
+            const hexCoord = getHexCoords(hex.position, hexScale);
+            return pointInsideHex(hexCoord, hexScale.hexSideLength, clickPos)
+        });
+
+        console.log(clickedHex);
+    }
+    
     function initResizeListener() {
         window.addEventListener('resize', handleResize);
         return () => {
@@ -79,33 +147,12 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         };
     }
 
-    function calcHexScale() {
-        const offset = windowSize.width / 300;
-        let lengthW = ((windowSize.width + offset) / props.rowLength - offset) / 1.49;
-        lengthW = lengthW - lengthW / (props.rowLength * 2);
-        //todo:
-        //  -change from rowLength to total/rowLength
-        let lengthH = ((windowSize.height - offset * (props.rowLength - 1)) / props.rowLength) / Math.sqrt(3);
-        lengthH = lengthH - lengthH / (props.rowLength * 2)
-        let length = 0,
-        canvasOffset = {x: 0, y: 0};
-        if (lengthH < lengthW) {
-            length = lengthH;
-            canvasOffset.x = ((windowSize.width - (((lengthH * 1.49 + offset) * props.rowLength)) - offset * 2.5) / 2)
-        } else {
-            length = lengthW;
-            canvasOffset.y = ((windowSize.height - (((lengthW * Math.sqrt(3) + offset) * props.rowLength))) / 2)
-        }
-        const font = length / 5;
-        return ({hexSideLength: length,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});
-    }
-
     function handleResize() {
         setWindowWidth({width: window.innerWidth, height: window.innerHeight});
     }
 
     function updateHexScale() {
-        setHexScale(calcHexScale);
+        setHexScale(calcHexScale(windowSize, props.rowLength));
     }
 
     function getTrivia() {
@@ -141,8 +188,8 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         setWinstate("ongoing");
     }
 
-    function drawHex(canvasContext: CanvasRenderingContext2D, hex: hexStatus) {
-        const {x:x, y:y} = getHexCoords(hex.position);
+    function drawHex(canvasContext: CanvasRenderingContext2D, hex: hexStatus, overrideColour?: string) {
+        const {x:x, y:y} = getHexCoords(hex.position, hexScale);
 
         canvasContext.beginPath();
         canvasContext.moveTo(x + hexScale.hexSideLength * Math.cos(0), y + hexScale.hexSideLength * Math.sin(0));
@@ -150,12 +197,12 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         for (let side = 0; side < 6; side++) {
             canvasContext.lineTo(x + hexScale.hexSideLength * Math.cos(side * 2 * Math.PI / 6), y + hexScale.hexSideLength * Math.sin(side * 2 * Math.PI / 6));
         }
-        canvasContext.fillStyle = getHexColour(hex.accessible, hex.answered);
+        canvasContext.fillStyle = overrideColour? overrideColour : getHexColour(hex.accessible, hex.answered);
         canvasContext.fill();
 
         canvasContext.font = `${hexScale.fontSize}px Georgia`;
         canvasContext.fillStyle = "black";
-        const textOffset = getTextOffset(hex.category);
+        const textOffset = getTextOffset(hex.category, hexScale.fontSize);
         canvasContext.fillText(hex.category, x - textOffset, y);
     }
 
@@ -173,48 +220,15 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         }
     }
 
-    function getHexCoords(hexPos: position) {
-        const {xPos: xPos, yPos: yPos} = hexPos;
-        const xGap = (hexScale.hexSideLength * 1.49 + hexScale.hexOffset);
-        const yGap = (Math.sqrt(3)) * hexScale.hexSideLength + hexScale.hexOffset;
-        if (hexPos.xPos % 2 === 0) {
-            return {x: xPos * xGap + hexScale.hexSideLength + hexScale.canvasOffset.x, y: yPos * yGap + hexScale.hexSideLength + hexScale.canvasOffset.y}
-        } else {
-            return {x: xPos * xGap + hexScale.hexSideLength + hexScale.canvasOffset.x, y: (yPos + 0.5) * yGap + hexScale.hexSideLength + hexScale.canvasOffset.y}
-        }
-    }
-
-    function getTextOffset(text: string) {
-        return text.length * hexScale.fontSize * 0.45 / 2;
-    }
-
     //calculates hexes adjacent to active hex to modify accessibility
     function getNeighbors(hexPos: {xPos: number, yPos: number}) {
         const neighbors: Array<string> = [];
         hexGrid.forEach(hex => {
-            if (hex.position.yPos === hexPos.yPos) {
-                if (hex.position.xPos === hexPos.xPos + 1 || hex.position.xPos === hexPos.xPos - 1) {
-                    neighbors.push(hex.id);
-                }
-            } else if (hexPos.yPos % 2 === 0) {
-                if (hex.position.yPos === hexPos.yPos - 1 || hex.position.yPos === hexPos.yPos + 1) {
-                    if (hex.position.xPos === hexPos.xPos -1 || hex.position.xPos === hexPos.xPos) {
-                        neighbors.push(hex.id);
-                    }
-                }
-            } else {
-                if (hex.position.yPos === hexPos.yPos - 1 || hex.position.yPos === hexPos.yPos + 1) {
-                    if (hex.position.xPos === hexPos.xPos || hex.position.xPos === hexPos.xPos + 1) {
-                        neighbors.push(hex.id);
-                    }
-                }
-            } 
+            if (checkAdjacent(hexPos, hex.position)) {
+                neighbors.push(hex.id);
+            }
         });
         return neighbors;
-    }
-
-    function formatString(inputText: string) {
-        return inputText.replaceAll("_", " ");
     }
 
     //populates hexgrid with hexState data, associating each hex with a question
