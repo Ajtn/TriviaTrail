@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef, MouseEventHandler, EventHandler } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import "../utility/hexUtility"; 
 import { hexStatus } from "./Hex";
 import DetailedHex from "./DetailedHex";
 import '../style/canvasStyle.css';
-import { testHexes } from "../assets/demoQs";
 import { calcHexScale, checkAdjacent, formatString, getGridX, getHexCoords, getTextOffset, pointInsideHex } from "../utility/hexUtility";
 
 type question = {
@@ -68,8 +67,8 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
     useEffect(initResizeListener, [windowSize]);
     useEffect(updateHexScale, [windowSize]);
     useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex]);
-    useEffect(initMouseMoveListener, []);
-    useEffect(initMouseClickListener, []);
+    useEffect(initMouseMoveListener, [hexScale, hexGrid, activeQ]);
+    useEffect(initMouseClickListener, [hexScale, hexGrid, activeQ]);
 
     const canvRef = useRef<HTMLCanvasElement>(null);
 
@@ -79,7 +78,6 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
 
         if (context) {
             context.clearRect(0, 0, windowSize.width, windowSize.height);
-            // testHexes.forEach(hex => drawHex(context, hex));
             hexGrid.forEach(hex => drawHex(context, hex));
             if (mouseOnHex) {
                 drawHex(context, mouseOnHex, "#e4f118");
@@ -94,22 +92,26 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         }
     }
 
-    function  handleMouseMove(event: MouseEvent) {
-        const hoverPos = {x: event.clientX, y: event.clientY};
-        const xGrid = getGridX(hoverPos.x, hexScale);
-        const xAlignedHexes: Array<hexStatus> = [];
+    //todo: find bug that interrupts hexGrid state update
+    function handleMouseMove(event: MouseEvent) {
 
-        hexGrid.forEach(hex => {
-            if (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1) {
-                xAlignedHexes.push(hex);
-            }
-        });
-
-        const hoverHex = xAlignedHexes.find(hex => {
-            const hexCoord = getHexCoords(hex.position, hexScale);
-            return pointInsideHex(hexCoord, hexScale.hexSideLength, hoverPos)
-        });
-        setMouseOnHex(hoverHex);
+        if (false) {
+            const hoverPos = {x: event.clientX, y: event.clientY};
+            const xGrid = getGridX(hoverPos.x, hexScale);
+            const xAlignedHexes: Array<hexStatus> = [];
+    
+            hexGrid.forEach(hex => {
+                if (hex.accessible && (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1)) {
+                    xAlignedHexes.push(hex);
+                }
+            });
+    
+            const hoverHex = xAlignedHexes.find(hex => {
+                const hexCoord = getHexCoords(hex.position, hexScale);
+                return pointInsideHex(hexCoord, hexScale.hexSideLength, hoverPos)
+            });
+            setMouseOnHex(hoverHex);
+        } 
     }
     
     function initMouseClickListener() {
@@ -120,24 +122,25 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
     }
 
     function handleMouseClick(event: MouseEvent) {
-        //setExtraHex({xPos: event.clientX, yPos: event.clientY});
-        const clickPos = {x: event.clientX, y: event.clientY};
-        const xGrid = getGridX(clickPos.x, hexScale);
-        const xAlignedHexes: Array<hexStatus> = [];
+        if (! activeQ.visible) {
+            const clickPos = {x: event.clientX, y: event.clientY};
+            const xGrid = getGridX(clickPos.x, hexScale);
+            const xAlignedHexes: Array<hexStatus> = [];
 
-        hexGrid.forEach(hex => {
-            if (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1) {
-                xAlignedHexes.push(hex);
+            hexGrid.forEach(hex => {
+                if (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1) {
+                    xAlignedHexes.push(hex);
+                }
+            });
+
+            const clickedHex = xAlignedHexes.find(hex => {
+                const hexCoord = getHexCoords(hex.position, hexScale);
+                return pointInsideHex(hexCoord, hexScale.hexSideLength, clickPos)
+            });
+            if (clickedHex?.accessible) {
+                setactiveQ({visible: true, qData: clickedHex});
             }
-        });
-
-        console.log(xAlignedHexes);
-        const clickedHex = xAlignedHexes.find(hex => {
-            const hexCoord = getHexCoords(hex.position, hexScale);
-            return pointInsideHex(hexCoord, hexScale.hexSideLength, clickPos)
-        });
-
-        console.log(clickedHex);
+        }
     }
     
     function initResizeListener() {
@@ -250,28 +253,17 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         });
     }
 
-    function updateactiveQ (event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        const clickedQ = hexGrid.find(q => q.id === event.currentTarget.classList[1]);
-        if (clickedQ) {
-            if (clickedQ.accessible) {
-                setactiveQ({visible:true, qData: clickedQ});
-            }
-        }
-    }
-
     //finds current question and modifies it's answered value in state
     function answerClicked(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
         const clickedA = event.currentTarget.outerText,
         clickedId = event.currentTarget.parentElement?.classList[1];
-
         setHexGrid(oldGrid => oldGrid.map(hex => {
             if (hex.id === clickedId) {
                 if (clickedA === activeQ.qData.correctAnswer) {
                     if (props.endHexes.some(endPos => (endPos.xPos === activeQ.qData.position.xPos && endPos.yPos === activeQ.qData.position.yPos))) {
                         setWinstate("won");
-                    } else {
-                        setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "pass"}}));
                     }
+                    setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "pass"}}));
                     updateNeighbors(hex.position);
                     return {...hex, answered: "pass", accessible: false};
                 } else {
@@ -282,6 +274,7 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
                 return hex;
             }
         }));
+
         setTimeout(() => {setactiveQ(oldQ => ({...oldQ, visible: false}))}, 1000);
     }
 
@@ -300,6 +293,9 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
     }
 
     return (
-        <canvas className="hex-canvas" width={windowSize.width} height={windowSize.height - 4} ref={canvRef}></canvas>
+        <div className="canvas-grid grid-container">
+            <DetailedHex activeQ={activeQ} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying} />
+            <canvas className="hex-canvas" width={windowSize.width} height={windowSize.height - 4} ref={canvRef}></canvas>
+        </div>
     )
 }

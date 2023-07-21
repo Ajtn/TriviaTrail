@@ -45,25 +45,45 @@ export function getGridX(x: number, hexScale: hexScale) {
 }
 
 export function checkAdjacent(hex1: position, hex2: position) {
-    if (hex1.yPos === hex2.yPos) {
-        if (hex1.xPos === hex2.xPos + 1 || hex1.xPos === hex2.xPos - 1) {
+    if (hex1.xPos === hex2.xPos) {
+        if (hex1.yPos === hex2.yPos + 1 || hex1.yPos === hex2.yPos - 1) {
             return true;
         }
-    } else if (hex2.yPos % 2 === 0) {
-        if (hex1.yPos === hex2.yPos - 1 || hex1.yPos === hex2.yPos + 1) {
-            if (hex1.xPos === hex2.xPos -1 || hex1.xPos === hex2.xPos) {
+    } else if (hex2.xPos % 2 === 0) {
+        if (hex1.xPos === hex2.xPos - 1 || hex1.xPos === hex2.xPos + 1) {
+            if (hex1.yPos === hex2.yPos -1 || hex1.yPos === hex2.yPos) {
                 return true;
             }
         }
     } else {
-        if (hex1.yPos === hex2.yPos - 1 || hex1.yPos === hex2.yPos + 1) {
-            if (hex1.xPos === hex2.xPos || hex1.xPos === hex2.xPos + 1) {
+        if (hex1.xPos === hex2.xPos - 1 || hex1.xPos === hex2.xPos + 1) {
+            if (hex1.yPos === hex2.yPos || hex1.yPos === hex2.yPos + 1) {
                 return true;
             }
         }
     }
     return false;
 }
+// export function checkAdjacent(hex1: position, hex2: position) {
+//     if (hex1.yPos === hex2.yPos) {
+//         if (hex1.xPos === hex2.xPos + 1 || hex1.xPos === hex2.xPos - 1) {
+//             return true;
+//         }
+//     } else if (hex2.yPos % 2 === 0) {
+//         if (hex1.yPos === hex2.yPos - 1 || hex1.yPos === hex2.yPos + 1) {
+//             if (hex1.xPos === hex2.xPos -1 || hex1.xPos === hex2.xPos) {
+//                 return true;
+//             }
+//         }
+//     } else {
+//         if (hex1.yPos === hex2.yPos - 1 || hex1.yPos === hex2.yPos + 1) {
+//             if (hex1.xPos === hex2.xPos || hex1.xPos === hex2.xPos + 1) {
+//                 return true;
+//             }
+//         }
+//     }
+//     return false;
+// }
 
 export function calcHexScale(windowSize: {width: number, height: number}, rowLength: number) {
     const offset = windowSize.width / 300;
