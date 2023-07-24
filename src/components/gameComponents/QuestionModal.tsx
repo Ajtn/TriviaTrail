@@ -1,6 +1,6 @@
-import { activeQ } from "./Grid";
+import { activeQ } from "./CanvasGrid";
 
-type DetailedHexProps = {
+type modalProps = {
     activeQ: activeQ;
     handleClick: (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => void;
     winState: string;
@@ -8,7 +8,7 @@ type DetailedHexProps = {
     handleClose: () => void;
 };
 
-export default function DetailedHex(props: DetailedHexProps) {
+export default function QuestionModal(props: modalProps) {
     const {qData: qData, visible: visible} = props.activeQ;
     let answers: Array<string>= [];
 

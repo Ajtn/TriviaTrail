@@ -4,17 +4,21 @@
 }
 
 div.app {
-    height: 100%;
-    width: 100%;
-    background-color: rgb(43, 35, 63);
-    margin: auto;
-    position: relative;
-    background-size: auto 100%;
+  height: 100%;
+  width: 100%;
+  background-color: rgb(43, 35, 63);
+  margin: auto;
+  position: relative;
+  display: flex;
+  background-size: auto 100%;
+}
+
+div.canvas-grid {
+  position: relative;
 }
 
 div.big-hex {
   position: absolute;
-
   background-color: cadetblue;
   margin: auto;
   border-radius: 30px;
@@ -59,4 +63,59 @@ div.response:hover {
   border-style: solid;
   border-width: 1px;
   border-color:rgb(240, 222, 226)
+}
+
+nav.primary-nav {
+  background-color:rgb(173, 117, 95);
+  border-radius: 1px;
+  border-style: solid;
+  border-color: rgb(150, 107, 80);
+  position: absolute;
+  font-size: 1.5vw;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4vw;
+}
+
+nav.expanded-nav {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: fit-content;
+}
+
+div.navicon {
+  display: flex;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  border-radius: 3px;
+  align-items: center;
+}
+
+div.navicon:hover {
+  background-color: rgb(185, 197, 230);
+}
+
+div > img {
+  width: 4vw;
+}
+
+div.toggle-nav > img {
+  width: 2vw;
+}
+
+div.info-modal {
+  position: absolute;
+  background-color: rgba(226, 183, 127, 0.98);
+  top: 20%;
+  left: 25%;
+  text-align: center;
+  z-index: 2;
+  padding: 10%;
+  width: 45%;
+  border-radius: 20px;
 }

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import "../utility/hexUtility"; 
+import "../../utility/hexUtility"; 
 import { hexStatus } from "./Hex";
-import DetailedHex from "./DetailedHex";
-import '../style/canvasStyle.css';
-import { calcHexScale, checkAdjacent, formatString, getGridX, getHexCoords, getTextOffset, pointInsideHex } from "../utility/hexUtility";
+import QuestionModal from "./QuestionModal";
+import '../../style/canvasStyle.css';
+import { calcHexScale, checkAdjacent, formatString, getGridX, getHexCoords, getTextOffset, pointInsideHex } from "../../utility/hexUtility";
 
 type question = {
     category: string;
@@ -37,7 +37,6 @@ export type position = {
 
 export type hexScale = {
     hexSideLength: number;
-    innerHexLength: number;
     hexOffset: number;
     fontSize: number;
     canvasOffset: {x: number, y: number};
@@ -45,10 +44,9 @@ export type hexScale = {
 
 type winState = "won" | "lose" | "ongoing"
 
-
 export default function CanvasGrid(props: {rowLength: number, startEndPos: {startHexes: Array<position>, endHexes: Array<position>}, api: apiConfig, darkMode: boolean}) {
 
-    const [windowSize, setWindowWidth] = useState({width: window.innerWidth, height: window.innerHeight});
+    const [windowSize, setWindowWidth] = useState({width: Math.round(window.innerWidth * 0.9), height: window.innerHeight});
     const [hexScale, setHexScale] = useState(calcHexScale(windowSize, props.rowLength));
     //Questiondata direct from API
     const [questions, setQuestions] = useState<question[]>([]),
@@ -57,7 +55,7 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
     //Array to track state of all hexes and their question data
     [hexGrid, setHexGrid] = useState<hexStatus[]>([]),
     [mouseOnHex, setMouseOnHex] = useState<hexStatus | undefined>(),
-    //Currently selected question and whether it's visible in pop up big hex
+    //Currently selected question and whether it's visible in pop up modal
     [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
 
     useEffect(getTrivia, []);
@@ -65,24 +63,24 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
     useEffect(checkFailState, [hexGrid]);
     useEffect(initResizeListener, [windowSize]);
     useEffect(updateHexScale, [windowSize]);
-    useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex]);
+    useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex, props.darkMode]);
     useEffect(initMouseMoveListener, [hexScale, hexGrid, activeQ]);
     useEffect(initMouseClickListener, [hexScale, hexGrid, activeQ]);
 
     const canvRef = useRef<HTMLCanvasElement>(null);
 
-    function drawGrid() {
-        const canvas = canvRef.current;
-        const context = canvas?.getContext('2d');
-
-        if (context) {
-            context.clearRect(0, 0, windowSize.width, windowSize.height);
-            hexGrid.forEach(hex => drawHex(context, hex));
-            // if (mouseOnHex) {
-            //     drawHex(context, mouseOnHex, "#e4f118");
-            // }
-        }
-    }
+    const defaultHexStyle = {
+        pass: {colour: "#338f3f", fontColour: "#faebd7"},
+        fail: {colour: "#ba2a37", fontColour: "#faebd7"},
+        acessible: {colour: "#5e9cca", fontColour: "black"},
+        inaccessible: {colour: "#ade4ef", fontColour: "black"}
+    },
+    darkHexStyle = {
+        pass: {colour: "green", fontColour: "antiqueWhite"},
+        fail: {colour: "ba2a37", fontColour: "antiqueWhite"},
+        acessible: {colour: "green", fontColour: "antiqueWhite"},
+        inaccessible: {colour: "green", fontColour: "antiqueWhite"}
+    };
 
     function initMouseMoveListener() {
         window.addEventListener('mousemove', handleMouseMove);
@@ -153,12 +151,24 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
         setWindowWidth({width: Math.round(window.innerWidth * 0.9), height: window.innerHeight});
     }
 
+    function drawGrid() {
+        const canvas = canvRef.current;
+        const context = canvas?.getContext('2d');
+
+        if (context) {
+            context.clearRect(0, 0, windowSize.width, windowSize.height);
+            hexGrid.forEach(hex => drawHex(context, hex));
+            if (mouseOnHex) {
+                drawHex(context, mouseOnHex, {colour: "#e4f118", fontColour: "black"});
+            }
+        }
+    }
+
     function updateHexScale() {
         setHexScale(calcHexScale(windowSize, props.rowLength));
     }
 
     function getTrivia() {
-        //const url = apiParameters.length > 0 ? props.api.baseUrl + "?" + apiParameters.map(param => param + "&") : props.api.baseUrl;
         const url = props.api.urlParams.length > 0 ? props.api.baseUrl + "?" + props.api.urlParams.map(param => param + "&") : props.api.baseUrl;
         fetch(url, {
             method: props.api.method,
@@ -191,7 +201,7 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
         setWinstate("ongoing");
     }
 
-    function drawHex(canvasContext: CanvasRenderingContext2D, hex: hexStatus, overrideStyle?: {colour: string, borderColour: string, fontColour: string}) {
+    function drawHex(canvasContext: CanvasRenderingContext2D, hex: hexStatus, overrideStyle?: {colour: string, fontColour: string}) {
         const {x:x, y:y} = getHexCoords(hex.position, hexScale);
         let tempStyle;
         if (overrideStyle) {
@@ -218,13 +228,13 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
 
     function getHexStyle(accessible: boolean, answered: "pass" | "fail" | "unanswered") {
         if (answered === "pass") {
-            return {colour: "#338f3f", borderColour: "#a05f55", fontColour: "#faebd7"}
+            return !props.darkMode? defaultHexStyle.pass : darkHexStyle.pass;
         } else if (answered === "fail") {
-            return {colour: "#ba2a37", borderColour: "#66e377", fontColour: "#faebd7"}
+            return !props.darkMode? defaultHexStyle.fail : darkHexStyle.fail;
         } else if (accessible) {
-            return {colour: "#5e9cca", borderColour: "#f4b480", fontColour: "black"}
+            return !props.darkMode? defaultHexStyle.acessible : darkHexStyle.acessible;
         } else {
-            return {colour: "#ade4ef", borderColour: "#91b2b2", fontColour: "black"}
+            return !props.darkMode? defaultHexStyle.inaccessible : darkHexStyle.inaccessible;
         }
     }
 
@@ -279,7 +289,6 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
                 return hex;
             }
         }));
-
         setTimeout(() => {setactiveQ(oldQ => ({...oldQ, visible: false}))}, 1000);
     }
 
@@ -299,7 +308,7 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
 
     return (
         <div className="canvas-grid grid-container">
-            <DetailedHex activeQ={activeQ} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying} />
+            <QuestionModal activeQ={activeQ} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying} />
             <canvas className="hex-canvas" width={windowSize.width} height={windowSize.height - 4} ref={canvRef}></canvas>
         </div>
     )

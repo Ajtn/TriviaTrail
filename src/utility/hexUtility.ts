@@ -1,4 +1,4 @@
-import { position, hexScale } from "../components/CanvasGrid";
+import { position, hexScale } from "../components/gameComponents/CanvasGrid";
 
 //practically equivalent to position, added to clarify expected logic
 export type coordinate = {
@@ -83,7 +83,7 @@ export function calcHexScale(windowSize: {width: number, height: number}, rowLen
         canvasOffset.y = ((windowSize.height - (((lengthW * Math.sqrt(3) + offset) * rowLength))) / 2)
     }
     const font = length / 5;
-    return ({hexSideLength: length, innerHexLength: length - Math.round(length/10) ,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});
+    return ({hexSideLength: length ,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});
 }
 
 
