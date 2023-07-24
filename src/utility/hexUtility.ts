@@ -32,9 +32,9 @@ export function getHexCoords(hexGridPos: position, hexScale: hexScale) {
     const xGap = (hexScale.hexSideLength * 1.49 + hexScale.hexOffset);
     const yGap = (Math.sqrt(3)) * hexScale.hexSideLength + hexScale.hexOffset;
     if (xPos % 2 === 0) {
-        return {x: xPos * xGap + hexScale.hexSideLength + hexScale.canvasOffset.x, y: yPos * yGap + hexScale.hexSideLength + hexScale.canvasOffset.y}
+        return {x: xPos * xGap + hexScale.hexSideLength + hexScale.canvasOffset.x, y: yPos * yGap + hexScale.hexSideLength + hexScale.canvasOffset.y - 10}
     } else {
-        return {x: xPos * xGap + hexScale.hexSideLength + hexScale.canvasOffset.x, y: (yPos + 0.5) * yGap + hexScale.hexSideLength + hexScale.canvasOffset.y}
+        return {x: xPos * xGap + hexScale.hexSideLength + hexScale.canvasOffset.x, y: (yPos + 0.5) * yGap + hexScale.hexSideLength + hexScale.canvasOffset.y - 10}
     }
 }
 
@@ -64,26 +64,6 @@ export function checkAdjacent(hex1: position, hex2: position) {
     }
     return false;
 }
-// export function checkAdjacent(hex1: position, hex2: position) {
-//     if (hex1.yPos === hex2.yPos) {
-//         if (hex1.xPos === hex2.xPos + 1 || hex1.xPos === hex2.xPos - 1) {
-//             return true;
-//         }
-//     } else if (hex2.yPos % 2 === 0) {
-//         if (hex1.yPos === hex2.yPos - 1 || hex1.yPos === hex2.yPos + 1) {
-//             if (hex1.xPos === hex2.xPos -1 || hex1.xPos === hex2.xPos) {
-//                 return true;
-//             }
-//         }
-//     } else {
-//         if (hex1.yPos === hex2.yPos - 1 || hex1.yPos === hex2.yPos + 1) {
-//             if (hex1.xPos === hex2.xPos || hex1.xPos === hex2.xPos + 1) {
-//                 return true;
-//             }
-//         }
-//     }
-//     return false;
-// }
 
 export function calcHexScale(windowSize: {width: number, height: number}, rowLength: number) {
     const offset = windowSize.width / 300;
@@ -103,7 +83,7 @@ export function calcHexScale(windowSize: {width: number, height: number}, rowLen
         canvasOffset.y = ((windowSize.height - (((lengthW * Math.sqrt(3) + offset) * rowLength))) / 2)
     }
     const font = length / 5;
-    return ({hexSideLength: length,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});
+    return ({hexSideLength: length, innerHexLength: length - Math.round(length/10) ,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});
 }
 
 

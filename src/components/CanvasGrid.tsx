@@ -37,6 +37,7 @@ export type position = {
 
 export type hexScale = {
     hexSideLength: number;
+    innerHexLength: number;
     hexOffset: number;
     fontSize: number;
     canvasOffset: {x: number, y: number};
@@ -45,14 +46,12 @@ export type hexScale = {
 type winState = "won" | "lose" | "ongoing"
 
 
-export default function CanvasGrid(props: {rowLength: number, startingHexes: Array<position>, endHexes:Array<position> ,api: apiConfig}) {
+export default function CanvasGrid(props: {rowLength: number, startEndPos: {startHexes: Array<position>, endHexes: Array<position>}, api: apiConfig, darkMode: boolean}) {
 
     const [windowSize, setWindowWidth] = useState({width: window.innerWidth, height: window.innerHeight});
     const [hexScale, setHexScale] = useState(calcHexScale(windowSize, props.rowLength));
     //Questiondata direct from API
     const [questions, setQuestions] = useState<question[]>([]),
-    //User defined parameters to modify API call to specific question types (not implemented)
-    //[apiParameters, setApiParameters] = useState(props.api.urlParams),
     //winState to check if the game is still going
     [winState, setWinstate] = useState<winState>("ongoing"),
     //Array to track state of all hexes and their question data
@@ -79,9 +78,9 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         if (context) {
             context.clearRect(0, 0, windowSize.width, windowSize.height);
             hexGrid.forEach(hex => drawHex(context, hex));
-            if (mouseOnHex) {
-                drawHex(context, mouseOnHex, "#e4f118");
-            }
+            // if (mouseOnHex) {
+            //     drawHex(context, mouseOnHex, "#e4f118");
+            // }
         }
     }
 
@@ -151,7 +150,7 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
     }
 
     function handleResize() {
-        setWindowWidth({width: window.innerWidth, height: window.innerHeight});
+        setWindowWidth({width: Math.round(window.innerWidth * 0.9), height: window.innerHeight});
     }
 
     function updateHexScale() {
@@ -183,6 +182,7 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
 
     function resetApp() {
         getTrivia();
+        setactiveQ(oldQ => ({...oldQ, visible: false}));
         setWinstate("ongoing");
     }
 
@@ -191,8 +191,14 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         setWinstate("ongoing");
     }
 
-    function drawHex(canvasContext: CanvasRenderingContext2D, hex: hexStatus, overrideColour?: string) {
+    function drawHex(canvasContext: CanvasRenderingContext2D, hex: hexStatus, overrideStyle?: {colour: string, borderColour: string, fontColour: string}) {
         const {x:x, y:y} = getHexCoords(hex.position, hexScale);
+        let tempStyle;
+        if (overrideStyle) {
+            tempStyle = overrideStyle;
+        } else {
+            tempStyle = getHexStyle(hex.accessible, hex.answered);
+        }
 
         canvasContext.beginPath();
         canvasContext.moveTo(x + hexScale.hexSideLength * Math.cos(0), y + hexScale.hexSideLength * Math.sin(0));
@@ -200,26 +206,25 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         for (let side = 0; side < 6; side++) {
             canvasContext.lineTo(x + hexScale.hexSideLength * Math.cos(side * 2 * Math.PI / 6), y + hexScale.hexSideLength * Math.sin(side * 2 * Math.PI / 6));
         }
-        canvasContext.fillStyle = overrideColour? overrideColour : getHexColour(hex.accessible, hex.answered);
+        canvasContext.fillStyle = tempStyle.colour;
         canvasContext.fill();
 
+
         canvasContext.font = `${hexScale.fontSize}px Georgia`;
-        canvasContext.fillStyle = "black";
+        canvasContext.fillStyle = tempStyle.fontColour;
         const textOffset = getTextOffset(hex.category, hexScale.fontSize);
         canvasContext.fillText(hex.category, x - textOffset, y);
     }
 
-    function getHexColour(accessible: boolean, answered: "pass" | "fail" | "unanswered") {
-        if (answered === "unanswered") {
-            if (! accessible) {
-                return "#ade4ef";
-            } else {
-                return "#1d9cc4";
-            }
-        } else if (answered === "pass") {
-            return "#66e377";
+    function getHexStyle(accessible: boolean, answered: "pass" | "fail" | "unanswered") {
+        if (answered === "pass") {
+            return {colour: "#338f3f", borderColour: "#a05f55", fontColour: "#faebd7"}
+        } else if (answered === "fail") {
+            return {colour: "#ba2a37", borderColour: "#66e377", fontColour: "#faebd7"}
+        } else if (accessible) {
+            return {colour: "#5e9cca", borderColour: "#f4b480", fontColour: "black"}
         } else {
-            return "#e53a49";
+            return {colour: "#ade4ef", borderColour: "#91b2b2", fontColour: "black"}
         }
     }
 
@@ -246,7 +251,7 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
                 xPos = 0;
                 yPos++;
             }
-            if (props.startingHexes.some(startPos => tempHex.position.xPos === startPos.xPos && tempHex.position.yPos === startPos.yPos)) {
+            if (props.startEndPos.startHexes.some(startPos => tempHex.position.xPos === startPos.xPos && tempHex.position.yPos === startPos.yPos)) {
                 tempHex.accessible = true;
             }
             return tempHex;
@@ -260,7 +265,7 @@ export default function CanvasGrid(props: {rowLength: number, startingHexes: Arr
         setHexGrid(oldGrid => oldGrid.map(hex => {
             if (hex.id === clickedId) {
                 if (clickedA === activeQ.qData.correctAnswer) {
-                    if (props.endHexes.some(endPos => (endPos.xPos === activeQ.qData.position.xPos && endPos.yPos === activeQ.qData.position.yPos))) {
+                    if (props.startEndPos.endHexes.some(endPos => (endPos.xPos === activeQ.qData.position.xPos && endPos.yPos === activeQ.qData.position.yPos))) {
                         setWinstate("won");
                     }
                     setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "pass"}}));

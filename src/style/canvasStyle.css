@@ -9,6 +9,7 @@ div.app {
     background-color: rgb(43, 35, 63);
     margin: auto;
     position: relative;
+    background-size: auto 100%;
 }
 
 div.big-hex {
@@ -35,7 +36,7 @@ div.big-hex {
 }
 .big-hex > h2 {
   margin: auto;
-  font-size: 1.2rem;
+  font-size: 2vw;
   text-align: center;
 }
 
