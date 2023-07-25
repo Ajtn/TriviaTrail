@@ -36,14 +36,13 @@ export default function Navbar(props: navbarProps) {
     });
 
     function expandNav(event: MouseEvent) {
-        console.log(event)
         if (event.type === "click") {
             setNavOpen(navState => ({...navState, clickOpen: !navState.clickOpen}));
         } else {
             setNavOpen(navState => ({...navState, scrollOpen: !navState.scrollOpen}));
         }
     }
-    console.log(navOpen);
+
     return (
         <nav className={navOpen.clickOpen || navOpen.scrollOpen ? "expanded-nav primary-nav" : "hidden-nav primary-nav"} >
             <div className="toggle-nav"><img onClick={expandNav} src={(navOpen.clickOpen) ? minIcon : maxIcon} alt="expand icon" width={25}/></div>

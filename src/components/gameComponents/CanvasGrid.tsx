@@ -3,7 +3,7 @@ import "../../utility/hexUtility";
 import { hexStatus } from "./Hex";
 import QuestionModal from "./QuestionModal";
 import '../../style/canvasStyle.css';
-import { calcHexScale, checkAdjacent, formatString, getGridX, getHexCoords, getTextOffset, pointInsideHex } from "../../utility/hexUtility";
+import {calcHexScale, getHexCoords, getGridX, pointInsideHex, getTextOffset, checkAdjacent, formatString} from "../../utility/hexUtility";
 
 type question = {
     category: string;
@@ -23,11 +23,14 @@ export type activeQ = {
     qData: hexStatus;
 }
 
+type urlParams = {
+    [index: string]: string;
+}
 
 type apiConfig = {
     baseUrl: string;
     method: string;
-    urlParams: Array<string>;
+    urlParams: urlParams;
 }
 
 export type position = {
@@ -58,7 +61,7 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
     //Currently selected question and whether it's visible in pop up modal
     [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: ""}});
 
-    useEffect(getTrivia, []);
+    useEffect(initTrivia, []);
     useEffect(initHexGrid, [questions]);
     useEffect(checkFailState, [hexGrid]);
     useEffect(initResizeListener, [windowSize]);
@@ -76,10 +79,10 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
         inaccessible: {colour: "#ade4ef", fontColour: "black"}
     },
     darkHexStyle = {
-        pass: {colour: "green", fontColour: "antiqueWhite"},
-        fail: {colour: "ba2a37", fontColour: "antiqueWhite"},
-        acessible: {colour: "green", fontColour: "antiqueWhite"},
-        inaccessible: {colour: "green", fontColour: "antiqueWhite"}
+        pass: {colour: "#043006", fontColour: "antiqueWhite"},
+        fail: {colour: "#520d1a", fontColour: "antiqueWhite"},
+        acessible: {colour: "#111b4b", fontColour: "antiqueWhite"},
+        inaccessible: {colour: "#263045", fontColour: "#89879b"}
     };
 
     function initMouseMoveListener() {
@@ -168,8 +171,15 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
         setHexScale(calcHexScale(windowSize, props.rowLength));
     }
 
-    function getTrivia() {
-        const url = props.api.urlParams.length > 0 ? props.api.baseUrl + "?" + props.api.urlParams.map(param => param + "&") : props.api.baseUrl;
+    function initTrivia() {
+        // const url = props.api.urlParams.length > 0 ? props.api.baseUrl + "?" + props.api.urlParams.map(param => param + "&") : props.api.baseUrl;
+        const paramKeys = Object.keys(props.api.urlParams);
+        let url = props.api.baseUrl;
+        if (paramKeys.length > 0) {
+            url = url + "?";
+            paramKeys.forEach(key => url = url + key + props.api.urlParams[key] + ",");
+            url.slice(0, -1);
+        }
         fetch(url, {
             method: props.api.method,
         })
@@ -191,7 +201,7 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
     }
 
     function resetApp() {
-        getTrivia();
+        initTrivia();
         setactiveQ(oldQ => ({...oldQ, visible: false}));
         setWinstate("ongoing");
     }
@@ -306,6 +316,7 @@ export default function CanvasGrid(props: {rowLength: number, startEndPos: {star
         });
     }
 
+    console.log(hexGrid);
     return (
         <div className="canvas-grid grid-container">
             <QuestionModal activeQ={activeQ} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying} />

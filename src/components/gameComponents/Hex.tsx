@@ -1,5 +1,5 @@
 import React from "react";
-import { position } from "./Grid";
+import { position } from "./CanvasGrid";
 
 export type hexStatus = {
     id: string;

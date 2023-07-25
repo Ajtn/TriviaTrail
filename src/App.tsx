@@ -45,7 +45,7 @@ function App() {
   }
 
   function apiParamsChanged(apiParameters: Array<string>) {
-    setApiParameters(apiParameters);
+    setApiParameters(oldParams => [...oldParams, ...apiParameters]);
   }
 
   //https://the-trivia-api.com/v2/questions
@@ -57,7 +57,7 @@ function App() {
     <div className={`app ${darkMode? "darkmode" : "lightmode"}`}>
       <Navbar handleIconClick={handleIconClick} />
       {infoModal.visible && <div className={`info-modal ${infoModal.mode}`}>
-        {infoModal.mode === "info"? `${instructions}` : <Settings handleRuleChanges={rulesChanged} handleApiChanges={apiParamsChanged} />}
+        {infoModal.mode === "info"? `${instructions}` : <Settings categoriesEndpoint='' handleRuleChanges={rulesChanged} ruleOptions={[]} handleApiChanges={apiParamsChanged} />}
       </div>}
       <CanvasGrid rowLength={5} startEndPos={gameRules} api={apiDetails} darkMode={darkMode}/>
     </div>

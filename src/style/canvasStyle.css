@@ -3,10 +3,37 @@
     padding: unset;
 }
 
+div.app.lightmode {
+  --app-background: rgb(43, 35, 63);
+  --nav-colour: rgb(168, 126, 110);
+  --nav-secondary: rgb(79, 112, 127);
+  --nav-highlight: rgb(111, 155, 176);
+  --nav-tertiary: rgb(159, 142, 141);
+  --nav-text-colour: rgb(36, 34, 25);
+}
+
+div.app.darkmode {
+  --app-background: rgb(90, 69, 144);
+  --nav-colour: rgb(63, 26, 11);
+  --nav-secondary: rgb(96, 125, 60);
+  --nav-highlight: rgb(111, 155, 176);
+  --nav-tertiary: rgb(159, 142, 141);
+  --nav-text-colour: white;
+}
+
+div.app.darkmode {
+  --app-background: rgb(14, 11, 22);
+  --nav-colour: rgb(162, 57,202);
+  --nav-secondary: rgb(71, 23, 246);
+  --nav-highlight: rgb(231, 223, 221);
+  --nav-tertiary: rgba(86, 70, 147, 0.526);
+  --nav-text-colour: rgb(37, 24, 1);
+}
+
 div.app {
   height: 100%;
   width: 100%;
-  background-color: rgb(43, 35, 63);
+  background-color: var(--app-background);
   margin: auto;
   position: relative;
   display: flex;
@@ -66,7 +93,7 @@ div.response:hover {
 }
 
 nav.primary-nav {
-  background-color:rgb(173, 117, 95);
+  background-color:var(--nav-colour);
   border-radius: 1px;
   border-style: solid;
   border-color: rgb(150, 107, 80);
@@ -77,6 +104,13 @@ nav.primary-nav {
   left: 0;
   bottom: 0;
   width: 4vw;
+}
+
+@media only screen and (max-width: 600px) {
+  nav.primary-nav {
+    font-size: 2.5vw;
+    width: 6vw;
+  }
 }
 
 nav.expanded-nav {
@@ -109,13 +143,69 @@ div.toggle-nav > img {
 }
 
 div.info-modal {
+  color: var(--nav-text-colour);
   position: absolute;
-  background-color: rgba(226, 183, 127, 0.98);
+  background-color: var(--nav-colour);
   top: 20%;
   left: 25%;
-  text-align: center;
   z-index: 2;
   padding: 10%;
   width: 45%;
-  border-radius: 20px;
+  border-radius: 15px;
+}
+
+div.settings-title {
+  background-color: var(--nav-secondary);
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-left: 2vw;
+  padding-right: 2vw;
+  border-radius: 15px;
+  width: fit-content;
+}
+
+div.app-settings-info {
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+}
+
+div.settings-title:hover {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 2vw - 1px;
+  padding-right: 2vw - 1px;
+  border: 1px;
+  border-style: solid;
+  border-color: var(--nav-secondary);
+  background-color: var(--nav-highlight);
+}
+
+div.settings-options-menu {
+  display: flex;
+  flex-wrap: wrap;
+  background-color: var(--nav-tertiary);
+  justify-content: space-around;
+  padding: 2%;
+  border-radius: 10px;
+  gap: 5px;
+}
+
+div.setting-option {
+  padding: 5px;
+  border-radius: 10px;
+  background-color: var(--nav-secondary);
+  width: fit-content;
+}
+
+div.setting-option.selected{
+  background-color: wheat;
+}
+
+div.setting-option:hover {
+  padding: 4px;
+  border: 1px;
+  border-style: solid;
+  border-color: var(--nav-colour);
+  background-color: var(--nav-highlight);
 }
