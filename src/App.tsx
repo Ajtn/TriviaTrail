@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CanvasGrid from './components/gameComponents/CanvasGrid';
 import Navbar from './components/UI/NavBar';
 import Settings from './components/UI/Settings';
@@ -53,6 +53,9 @@ function App() {
   [darkMode, setDarkMode] = useState(false),
   [gameMode, setGameMode] = useState(0);
 
+  useEffect(initCategories, []);
+  useEffect(categoriesChanged, [selectedCategories]);
+
   function initCategories() {
     fetch('https://the-trivia-api.com/v2/categories')
     .then(res => res.json())
@@ -85,12 +88,25 @@ function App() {
     }
   }
 
-  function apiParamsChanged(categories: string) {
-    setApiParameters(oldParams => ({...oldParams, categories: categories}))
+  function categoryToggled(index: number) {
+    setSelectedCategories(oldCats => oldCats.map((cat, i) => i === index ? {...cat, selected: !cat.selected} : cat));
+  }
+
+  function categoriesChanged() {
+    let categoryString = "";
+    if (selectedCategories.some(cat => !cat.selected)) {
+      selectedCategories.forEach(cat => {
+            if (cat.selected) {
+                categoryString = categoryString + cat.name + ",";
+            }
+        });
+        categoryString = categoryString.slice(0, -1).replace(/\s/g,'');
+    }
+    setApiParameters(oldParams => ({...oldParams, categories: categoryString}))
   }
 
   //https://the-trivia-api.com/v2/questions
-  const apiDetails = {baseUrl: "", method: "GET", urlParams: apiParameters};
+  const apiDetails = {baseUrl: "https://the-trivia-api.com/v2/questions", method: "GET", urlParams: apiParameters};
 
   const instructions = `Click/Tap hexes to answer questions and open up new hexes to solve. ${ruleOptions[gameMode].description}`;
 
@@ -99,7 +115,7 @@ function App() {
       <Navbar handleIconClick={handleIconClick} />
       {infoModal.visible && <div className={`info-modal ${infoModal.mode}`}>
         <div className="toggle-info-modal"><img onClick={minimiseInfo} src={minIcon} alt="minimise icon" width={25}/></div>
-        {infoModal.mode === "info"? instructions : <Settings categoriesEndpoint='https://the-trivia-api.com/v2/categories' currentRule={gameMode} handleRuleChanges={rulesChanged} ruleOptions={ruleOptions} handleApiChanges={apiParamsChanged} />}
+        {infoModal.mode === "info"? instructions : <Settings categoryOptions={selectedCategories} handleCatChange={categoryToggled} handleRuleChanges={rulesChanged} ruleOptions={ruleOptions} currentRule={gameMode} />}
       </div>}
       <CanvasGrid gameRules={ruleOptions[gameMode]} api={apiDetails} darkMode={darkMode} canClick={!infoModal.visible}/>
     </div>
