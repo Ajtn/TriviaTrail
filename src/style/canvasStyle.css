@@ -154,6 +154,12 @@ div.info-modal {
   border-radius: 15px;
 }
 
+div.toggle-info-modal {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 div.settings-title {
   background-color: var(--nav-secondary);
   padding-top: 5px;

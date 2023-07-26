@@ -3,6 +3,7 @@ import CanvasGrid from './components/gameComponents/CanvasGrid';
 import Navbar from './components/UI/NavBar';
 import Settings from './components/UI/Settings';
 import { position } from './components/gameComponents/CanvasGrid';
+import minIcon from './assets/minimise.png';
 
 /* 
   Todo:
@@ -11,20 +12,52 @@ import { position } from './components/gameComponents/CanvasGrid';
       *background colour on double rotate
     -goal state explanation
     -alternative scrolling game mode
-    -question API modifiers
-      *populate query options
-      *implement settings component
 */
-
+export type ruleSet = {
+  name: string;
+  rowLength: number;
+  colLength: number;
+  startHexes: Array<position>;
+  endHexes: Array<position>;
+  specialRules: Array<string>;
+  description: string;
+}
 
 function App() {
 
+  const ruleOptions: Array<ruleSet> = [
+    {
+      name: "Escape",
+      rowLength: 7,
+      colLength: 7,
+      startHexes: [{xPos: 3, yPos: 3}],
+      endHexes: [{xPos: 0, yPos: 0}, {xPos: 6, yPos: 0}, {xPos: 0, yPos: 6}, {xPos: 6, yPos: 6}],
+      specialRules: [],
+      description: "Start in the middle of a 5x5 grid and work your way to the corners to escape"
+    },
+    {
+      name: "Endless Hex Crawl",
+      rowLength: 5,
+      colLength: 0,
+      startHexes: [{xPos: 0, yPos: 0}, {xPos: 1, yPos: 0}, {xPos: 2, yPos: 0}, {xPos: 3, yPos: 0}, {xPos: 4, yPos: 0}],
+      endHexes: [],
+      specialRules: ["endless"],
+      description: "Keep answering questions until you get stuck"
+    },
+  ];
+
   //User defined parameters to modify API call to specific question types
-  const [apiParameters, setApiParameters] = useState(["limit=25", "difficulties=easy"]),
+  const [apiParameters, setApiParameters] = useState({limit: "25", difficulties: "easy"}),
+  [selectedCategories, setSelectedCategories] = useState([{name: "", selected: false}]),
   [infoModal, setInfoModal] = useState({visible: false, mode: "dark"}),
   [darkMode, setDarkMode] = useState(false),
-  [gameRules, setGameRules] = useState({startHexes: [{xPos:2, yPos: 2}], endHexes: [{xPos: 0, yPos: 0}, {xPos: 4, yPos: 0}, {xPos: 0, yPos: 4}, {xPos: 4, yPos: 4}]});
-  
+  [gameMode, setGameMode] = useState(0);
+
+  function initCategories() {
+    fetch('https://the-trivia-api.com/v2/categories')
+    .then(res => res.json())
+    .then(data => setSelectedCategories(Object.keys(data).map(cat => ({name: cat, selected: false}))));
+  }
   
   function handleIconClick(typeClicked: "info" | "settings" | "dark") {
     if (typeClicked === "dark") {
@@ -40,26 +73,35 @@ function App() {
     }
   }
 
-  function rulesChanged(rules: {startHexes: Array<position>, endHexes: Array<position>}) {
-    setGameRules(rules);
+  function minimiseInfo() {
+    setInfoModal(oldInfo => ({...oldInfo, visible: false}));
   }
 
-  function apiParamsChanged(apiParameters: Array<string>) {
-    setApiParameters(oldParams => [...oldParams, ...apiParameters]);
+  function rulesChanged(gameModeIndex: number) {
+    setGameMode(gameModeIndex);
+    if (ruleOptions[gameModeIndex].colLength > 0) {
+      const totalQuestions = ruleOptions[gameModeIndex].rowLength * ruleOptions[gameModeIndex].colLength;
+      setApiParameters(oldParams => ({...oldParams, limit: String(totalQuestions)}));
+    }
+  }
+
+  function apiParamsChanged(categories: string) {
+    setApiParameters(oldParams => ({...oldParams, categories: categories}))
   }
 
   //https://the-trivia-api.com/v2/questions
   const apiDetails = {baseUrl: "", method: "GET", urlParams: apiParameters};
 
-  const instructions = "Click/Tap hexes to answer questions and open up new hexes to solve. Your goal is to make to the corners";
+  const instructions = `Click/Tap hexes to answer questions and open up new hexes to solve. ${ruleOptions[gameMode].description}`;
 
   return (
     <div className={`app ${darkMode? "darkmode" : "lightmode"}`}>
       <Navbar handleIconClick={handleIconClick} />
       {infoModal.visible && <div className={`info-modal ${infoModal.mode}`}>
-        {infoModal.mode === "info"? `${instructions}` : <Settings categoriesEndpoint='' handleRuleChanges={rulesChanged} ruleOptions={[]} handleApiChanges={apiParamsChanged} />}
+        <div className="toggle-info-modal"><img onClick={minimiseInfo} src={minIcon} alt="minimise icon" width={25}/></div>
+        {infoModal.mode === "info"? instructions : <Settings categoriesEndpoint='https://the-trivia-api.com/v2/categories' currentRule={gameMode} handleRuleChanges={rulesChanged} ruleOptions={ruleOptions} handleApiChanges={apiParamsChanged} />}
       </div>}
-      <CanvasGrid rowLength={5} startEndPos={gameRules} api={apiDetails} darkMode={darkMode}/>
+      <CanvasGrid gameRules={ruleOptions[gameMode]} api={apiDetails} darkMode={darkMode} canClick={!infoModal.visible}/>
     </div>
   )
 }

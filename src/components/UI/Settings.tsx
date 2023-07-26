@@ -1,36 +1,38 @@
 import { useEffect, useState } from "react";
-import { position } from "../gameComponents/CanvasGrid";
+import { ruleSet } from "../../App";
 import SettingsSelect from "./SettingsSelect";
+
 
 type settingProps = {
     //categoryOptions: Array<string>;
     categoriesEndpoint: string;
     handleApiChanges: (apiParameters: string) => void;
-    ruleOptions: Array<{name: string, rules: {startHexes: Array<position>, endHexes: Array<position>}}>;
-    handleRuleChanges: (rules: {startHexes: Array<position>, endHexes: Array<position>}) => void;
+    ruleOptions: Array<ruleSet>;
+    currentRule: number;
+    handleRuleChanges: (modeIndex: number) => void;
 };
 
 
 export default function Settings(props: settingProps) {
 
     const [allCategories, setAllCategories] = useState([]),
-    [selectedCats, setSelectedCats] = useState([] as Array<{name: string, selected: boolean}>),
-    [selectedRules, setSelectedRules] = useState([]);
+    [selectedCats, setSelectedCats] = useState([] as Array<{name: string, selected: boolean}>);
 
-    useEffect(initCategories, [props.categoriesEndpoint]);
+    useEffect(initCategories, []);
     useEffect(initSelectedCats, [allCategories]);
     useEffect(updateApiParam, [selectedCats]);
 
     function initCategories() {
         fetch(props.categoriesEndpoint)
         .then(res => res.json())
-        .then(data => setAllCategories(Object.keys(data)));
+        .then(data => setAllCategories(Object.keys(data) as any));
     }
     
     function initSelectedCats() {
         setSelectedCats(allCategories.map(cat => ({name: cat, selected: true})));
     }
 
+    console.log(selectedCats)
     function updateApiParam() {
         let tempCats = "";
         if (selectedCats.some(cat => !cat.selected)) {
@@ -39,7 +41,7 @@ export default function Settings(props: settingProps) {
                     tempCats = tempCats + cat.name + ",";
                 }
             });
-            tempCats.slice(0, -1);
+            tempCats = tempCats.slice(0, -1).replace(/\s/g,'');
         }
         props.handleApiChanges(tempCats);
     }
@@ -56,14 +58,21 @@ export default function Settings(props: settingProps) {
                 });
             })
         }
-
     }
 
     function updateGameRules(event: React.MouseEvent<HTMLDivElement>) {
-
+        if (event.currentTarget.classList[3] && Number.isInteger(Number(event.currentTarget.classList[3]))) {
+            props.handleRuleChanges(Number(event.currentTarget.classList[3]));
+        }
     }
 
-    const ruleNames = props.ruleOptions.map(rule => rule.name);
+    const ruleNames = props.ruleOptions.map((rule, index) => {
+        if (index === props.currentRule) {
+            return {name: rule.name, selected: true};
+        } else {
+            return {name: rule.name, selected: false};
+        }
+    });
 
     return (
         <div className="app-settings-info">
