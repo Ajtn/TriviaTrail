@@ -27,11 +27,20 @@ function App() {
 
   const ruleOptions: Array<ruleSet> = [
     {
-      name: "Escape",
+      name: "Big Escape",
       rowLength: 7,
       colLength: 7,
-      startHexes: [{xPos: 3, yPos: 3}],
+      startHexes: [{xPos: 3, yPos: 3}, {xPos: 3, yPos: 2}],
       endHexes: [{xPos: 0, yPos: 0}, {xPos: 6, yPos: 0}, {xPos: 0, yPos: 6}, {xPos: 6, yPos: 6}],
+      specialRules: [],
+      description: "Start in the middle of a 7x7 grid and work your way to the corners to escape"
+    },
+    {
+      name: "Small Escape",
+      rowLength: 5,
+      colLength: 5,
+      startHexes: [{xPos: 2, yPos: 2}],
+      endHexes: [{xPos: 0, yPos: 0}, {xPos: 4, yPos: 0}, {xPos: 0, yPos: 4}, {xPos: 4, yPos: 4}],
       specialRules: [],
       description: "Start in the middle of a 5x5 grid and work your way to the corners to escape"
     },
@@ -47,14 +56,23 @@ function App() {
   ];
 
   //User defined parameters to modify API call to specific question types
-  const [apiParameters, setApiParameters] = useState({limit: "25", difficulties: "easy"}),
+  const [gameMode, setGameMode] = useState(0),
   [selectedCategories, setSelectedCategories] = useState([{name: "", selected: false}]),
+  [apiParameters, setApiParameters] = useState({}),
   [infoModal, setInfoModal] = useState({visible: false, mode: "dark"}),
   [darkMode, setDarkMode] = useState(false),
-  [gameMode, setGameMode] = useState(0);
+  [resetCount, setResetCount] = useState(0);
 
+  useEffect(rulesChanged, [gameMode]);
   useEffect(initCategories, []);
   useEffect(categoriesChanged, [selectedCategories]);
+
+  function rulesChanged() {
+    if (ruleOptions[gameMode].colLength > 0) {
+      const totalQuestions = ruleOptions[gameMode].rowLength * ruleOptions[gameMode].colLength;
+      setApiParameters(oldParams => ({...oldParams, limit: String(totalQuestions)}));
+    }
+  }
 
   function initCategories() {
     fetch('https://the-trivia-api.com/v2/categories')
@@ -76,16 +94,17 @@ function App() {
     }
   }
 
+  function reset() {
+    setResetCount(oldCount => oldCount + 1);
+  }
+
   function minimiseInfo() {
     setInfoModal(oldInfo => ({...oldInfo, visible: false}));
   }
 
-  function rulesChanged(gameModeIndex: number) {
+
+  function gameModeSelected(gameModeIndex: number) {
     setGameMode(gameModeIndex);
-    if (ruleOptions[gameModeIndex].colLength > 0) {
-      const totalQuestions = ruleOptions[gameModeIndex].rowLength * ruleOptions[gameModeIndex].colLength;
-      setApiParameters(oldParams => ({...oldParams, limit: String(totalQuestions)}));
-    }
   }
 
   function categoryToggled(index: number) {
@@ -97,7 +116,7 @@ function App() {
     if (selectedCategories.some(cat => !cat.selected)) {
       selectedCategories.forEach(cat => {
             if (cat.selected) {
-                categoryString = categoryString + cat.name + ",";
+                categoryString = categoryString + cat.name.replace('&', '_and_') + ",";
             }
         });
         categoryString = categoryString.slice(0, -1).replace(/\s/g,'');
@@ -115,9 +134,9 @@ function App() {
       <Navbar handleIconClick={handleIconClick} />
       {infoModal.visible && <div className={`info-modal ${infoModal.mode}`}>
         <div className="toggle-info-modal"><img onClick={minimiseInfo} src={minIcon} alt="minimise icon" width={25}/></div>
-        {infoModal.mode === "info"? instructions : <Settings categoryOptions={selectedCategories} handleCatChange={categoryToggled} handleRuleChanges={rulesChanged} ruleOptions={ruleOptions} currentRule={gameMode} />}
+        {infoModal.mode === "info"? instructions : <Settings categoryOptions={selectedCategories} handleCatChange={categoryToggled} handleRuleChanges={gameModeSelected} ruleOptions={ruleOptions} currentRule={gameMode} handleReset={reset}/>}
       </div>}
-      <CanvasGrid gameRules={ruleOptions[gameMode]} api={apiDetails} darkMode={darkMode} canClick={!infoModal.visible}/>
+      {apiDetails.urlParams.hasOwnProperty("limit") && <CanvasGrid gameRules={ruleOptions[gameMode]} api={apiDetails} darkMode={darkMode} canClick={!infoModal.visible} reset={resetCount} />}
     </div>
   )
 }

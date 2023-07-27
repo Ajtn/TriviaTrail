@@ -2,9 +2,10 @@ import React, { useState, useEffect, useRef } from "react";
 import "../../utility/hexUtility"; 
 import QuestionModal from "./QuestionModal";
 import '../../style/canvasStyle.css';
-import {calcHexScale, getHexCoords, getGridX, pointInsideHex, getTextOffset, checkAdjacent, formatString} from "../../utility/hexUtility";
+import {calcHexScale, getHexCoords, getGridX, pointInsideHex, getTextOffset, checkAdjacent, formatString, isHexWinState} from "../../utility/hexUtility";
 import { ruleSet } from "../../App";
 
+//object structure expected from API
 type question = {
     category: string;
     id: string;
@@ -53,17 +54,19 @@ export type position = {
 
 export type hexScale = {
     hexSideLength: number;
+    //space between each hex
     hexOffset: number;
     fontSize: number;
+    //offset added to all hexes to keep grid somewhat centered in canvas with variable screen sizes
     canvasOffset: {x: number, y: number};
 }
 
 type winState = "won" | "lose" | "ongoing"
 
-export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, darkMode: boolean, canClick: boolean}) {
+export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, darkMode: boolean, canClick: boolean, reset: number}) {
 
-    const [windowSize, setWindowWidth] = useState({width: Math.round(window.innerWidth * 0.9), height: window.innerHeight});
-    const [hexScale, setHexScale] = useState(calcHexScale(windowSize, props.gameRules.rowLength));
+    const [windowSize, setWindowSize] = useState({width: Math.round(window.innerWidth), height: window.innerHeight});
+    const [hexScale, setHexScale] = useState(calcHexScale(windowSize, props.gameRules.rowLength, props.gameRules.colLength));
     //Questiondata direct from API
     const [questions, setQuestions] = useState<question[]>([]),
     //winState to check if the game is still going
@@ -74,17 +77,18 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
     //Currently selected question and whether it's visible in pop up modal
     [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: "", isGoal: false}});
 
-    useEffect(initTrivia, []);
+    useEffect(initTrivia, [props.reset]);
     useEffect(initHexGrid, [questions]);
     useEffect(checkFailState, [hexGrid]);
     useEffect(initResizeListener, [windowSize]);
-    useEffect(updateHexScale, [windowSize]);
+    useEffect(updateHexScale, [windowSize, questions]);
     useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex, props.darkMode]);
     useEffect(initMouseMoveListener, [hexScale, hexGrid, activeQ]);
     useEffect(initMouseClickListener, [hexScale, hexGrid, activeQ, props.canClick]);
 
     const canvRef = useRef<HTMLCanvasElement>(null);
 
+    //lightmode colour scheme for hexes on canvas
     const defaultHexStyle = {
         pass: {colour: "#338f3f", fontColour: "#faebd7"},
         fail: {colour: "#ba2a37", fontColour: "#faebd7"},
@@ -92,6 +96,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         inaccessible: {colour: "#ade4ef", fontColour: "black"},
         goal: {colour: "#f3c45f", fontColour: "black"}
     },
+    //darkmode colour scheme for hexes on canvas
     darkHexStyle = {
         pass: {colour: "#043006", fontColour: "antiqueWhite"},
         fail: {colour: "#520d1a", fontColour: "antiqueWhite"},
@@ -166,16 +171,15 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
     }
 
     function handleResize() {
-        setWindowWidth({width: Math.round(window.innerWidth * 0.9), height: window.innerHeight});
+        setWindowSize({width: Math.round(window.innerWidth), height: window.innerHeight});
     }
 
 
     function updateHexScale() {
-        setHexScale(calcHexScale(windowSize, props.gameRules.rowLength));
+        setHexScale(calcHexScale(windowSize, props.gameRules.rowLength, props.gameRules.colLength));
     }
 
     function initTrivia() {
-        // const url = props.api.urlParams.length > 0 ? props.api.baseUrl + "?" + props.api.urlParams.map(param => param + "&") : props.api.baseUrl;
         const paramKeys = Object.keys(props.api.urlParams);
         let url = props.api.baseUrl;
         if (paramKeys.length > 0) {
@@ -186,6 +190,8 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
                 }
             });
             url = url.slice(0, -1);
+            console.log(url);
+            console.log(props.api.urlParams);
         }
 
         fetch(url, {
@@ -297,7 +303,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
             if (props.gameRules.startHexes.some(startPos => tempHex.position.xPos === startPos.xPos && tempHex.position.yPos === startPos.yPos)) {
                 tempHex.accessible = true;
             }
-            if (props.gameRules.endHexes.some(goalHex => tempHex.position.xPos === goalHex.xPos && tempHex.position.yPos === goalHex.yPos)) {
+            if (isHexWinState(tempHex.position, props.gameRules.endHexes)) {
                 tempHex.isGoal = true;
             }
             return tempHex;
@@ -311,7 +317,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         setHexGrid(oldGrid => oldGrid.map(hex => {
             if (hex.id === clickedId) {
                 if (clickedA === activeQ.qData.correctAnswer) {
-                    if (props.gameRules.endHexes.some(endPos => (endPos.xPos === activeQ.qData.position.xPos && endPos.yPos === activeQ.qData.position.yPos))) {
+                    if (activeQ.qData.isGoal) {
                         setWinstate("won");
                     }
                     setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "pass"}}));

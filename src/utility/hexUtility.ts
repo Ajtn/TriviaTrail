@@ -65,22 +65,32 @@ export function checkAdjacent(hex1: position, hex2: position) {
     return false;
 }
 
-export function calcHexScale(windowSize: {width: number, height: number}, rowLength: number) {
+//checks if a grid position is one of the goal positions, -1 is used to denote any position in that row/column
+export function isHexWinState(hexPos: position, goalPositions: Array<position>) {
+    if (goalPositions.some(goal => (hexPos.xPos === goal.xPos || goal.xPos === -1) && (goal.yPos === -1 || hexPos.yPos === goal.yPos))) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
+//calculates hex dimensions based on window scale and grid size
+export function calcHexScale(windowSize: {width: number, height: number}, rowLength: number, columnLength: number) {
     const offset = windowSize.width / 300;
-    let lengthW = ((windowSize.width + offset) / rowLength - offset) / 1.49;
+    let lengthW = ((windowSize.width * 0.95 + offset) / rowLength - offset) / 1.49;
     lengthW = lengthW - lengthW / (rowLength * 2);
-    //todo:
-    //  -change from rowLength to total/rowLength
-    let lengthH = ((windowSize.height - offset * (rowLength - 1)) / rowLength) / Math.sqrt(3);
-    lengthH = lengthH - lengthH / (rowLength * 2);
+    let lengthH = ((windowSize.height - offset * (rowLength - 1)) / columnLength) / Math.sqrt(3);
+    lengthH = lengthH - lengthH / (columnLength * 2);
     let length = 0,
     canvasOffset = {x: 0, y: 0};
     if (lengthH < lengthW) {
         length = lengthH;
-        canvasOffset.x = ((windowSize.width - (((lengthH * 1.49 + offset) * rowLength)) - offset * 2.5) / 2)
+        canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) / 2);
+        //canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) / 4);
     } else {
         length = lengthW;
-        canvasOffset.y = ((windowSize.height - (((lengthW * Math.sqrt(3) + offset) * rowLength))) / 2)
+        canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) / 2);
+        canvasOffset.x = canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) * 0.7);
     }
     const font = length / 5;
     return ({hexSideLength: length ,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});

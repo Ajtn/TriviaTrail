@@ -8,6 +8,7 @@ type settingProps = {
     ruleOptions: Array<ruleSet>;
     currentRule: number;
     handleRuleChanges: (index: number) => void;
+    handleReset: () => void;
 };
 
 
@@ -25,6 +26,7 @@ export default function Settings(props: settingProps) {
         <div className="app-settings-info">
             <SettingsSelect name={"Categories"} selectOptions={props.categoryOptions} handleChange={props.handleCatChange} />
             <SettingsSelect name={`Game mode`} selectOptions={ruleNames} handleChange={props.handleRuleChanges}/>
+            <div className="settings-title manual-reset" onClick={props.handleReset}><h3>Reset game?</h3></div>
         </div>
     );
 }
