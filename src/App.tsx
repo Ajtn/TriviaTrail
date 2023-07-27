@@ -4,6 +4,7 @@ import Navbar from './components/UI/NavBar';
 import Settings from './components/UI/Settings';
 import { position } from './components/gameComponents/CanvasGrid';
 import minIcon from './assets/minimise.png';
+import './style/canvasStyle.css';
 
 /* 
   Todo:
@@ -125,7 +126,7 @@ function App() {
   }
 
   //https://the-trivia-api.com/v2/questions
-  const apiDetails = {baseUrl: "https://the-trivia-api.com/v2/questions", method: "GET", urlParams: apiParameters};
+  const apiDetails = {baseUrl: "", method: "GET", urlParams: apiParameters};
 
   const instructions = `Click/Tap hexes to answer questions and open up new hexes to solve. ${ruleOptions[gameMode].description}`;
 
@@ -133,7 +134,7 @@ function App() {
     <div className={`app ${darkMode? "darkmode" : "lightmode"}`}>
       <Navbar handleIconClick={handleIconClick} />
       {infoModal.visible && <div className={`info-modal ${infoModal.mode}`}>
-        <div className="toggle-info-modal"><img onClick={minimiseInfo} src={minIcon} alt="minimise icon" width={25}/></div>
+        <div className="toggle-info-modal"><img onClick={minimiseInfo} src={minIcon} alt="minimise icon" /></div>
         {infoModal.mode === "info"? instructions : <Settings categoryOptions={selectedCategories} handleCatChange={categoryToggled} handleRuleChanges={gameModeSelected} ruleOptions={ruleOptions} currentRule={gameMode} handleReset={reset}/>}
       </div>}
       {apiDetails.urlParams.hasOwnProperty("limit") && <CanvasGrid gameRules={ruleOptions[gameMode]} api={apiDetails} darkMode={darkMode} canClick={!infoModal.visible} reset={resetCount} />}

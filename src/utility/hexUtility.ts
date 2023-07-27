@@ -85,12 +85,12 @@ export function calcHexScale(windowSize: {width: number, height: number}, rowLen
     canvasOffset = {x: 0, y: 0};
     if (lengthH < lengthW) {
         length = lengthH;
-        canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) / 2);
-        //canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) / 4);
+        canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset) / 2 + (windowSize.width * 0.06) );
+        canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength)) - offset * 2) / 4);
     } else {
         length = lengthW;
         canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) / 2);
-        canvasOffset.x = canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) * 0.7);
+        canvasOffset.x = canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) / 2 + (windowSize.width * 0.03));
     }
     const font = length / 5;
     return ({hexSideLength: length ,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});

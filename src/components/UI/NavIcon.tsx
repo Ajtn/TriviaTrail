@@ -4,7 +4,7 @@ export default function NavIcon(props: {name: string, image: string, expanded: b
         props.handleClick(props.mode);
     }
     return (
-        <div onClick={iconClicked} className={`navicon-${props.name} navicon`}>
+        <div onClick={iconClicked} className={`navicon navicon-${props.name}`}>
             <img src={props.image} alt="navicon"/>
             {props.expanded && <p className="navicon-text">{props.name}</p>}
         </div>

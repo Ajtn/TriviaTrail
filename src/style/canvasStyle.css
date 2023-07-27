@@ -22,27 +22,14 @@ div.app.darkmode {
 }
 
 
-div.app.darkmode {
-  --app-background: rgb(90, 69, 144);
-  --nav-colour: rgb(63, 26, 11);
-  --nav-secondary: rgb(96, 125, 60);
-  --nav-highlight: rgb(111, 155, 176);
-  --nav-tertiary: rgb(159, 142, 141);
-  --nav-text-colour: white;
-}
-
 div.app {
-  height: 100vh;
-  width: 100vw;
   background-color: var(--app-background);
-  margin: auto;
+  width: 100vw;
+  height: 100vh;
   position: relative;
   background-size: auto 100%;
 }
 
-div.canvas-grid {
-  position: relative;
-}
 
 div.big-hex {
   position: absolute;
@@ -50,9 +37,8 @@ div.big-hex {
   margin: auto;
   border-radius: 30px;
   padding: 30px;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  top: 20%;
+  left: 32%;
   background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79));
   min-width: 20%;
 }
@@ -64,6 +50,7 @@ div.big-hex {
   flex-direction: column;
   text-align: center;
   justify-content: space-evenly;
+  font-size: 12;
 }
 .big-hex > h2 {
   margin: auto;
@@ -103,15 +90,9 @@ nav.primary-nav {
   top: 0;
   left: 0;
   bottom: 0;
-  width: 4vw;
+  width: fit-content;
 }
 
-@media only screen and (max-width: 600px) {
-  nav.primary-nav {
-    font-size: 2.5vw;
-    width: 6vw;
-  }
-}
 
 nav.expanded-nav {
   position: absolute;
@@ -121,7 +102,12 @@ nav.expanded-nav {
   bottom: 0;
   width: fit-content;
 }
-
+div.nav-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 80%
+}
 div.navicon {
   display: flex;
   padding-top: 1rem;
@@ -134,12 +120,13 @@ div.navicon:hover {
   background-color: rgb(185, 197, 230);
 }
 
-div > img {
-  width: 4vw;
+div.navicon > img {
+  width: 7vw;
+  min-width: 100px;
 }
 
 div.toggle-nav > img {
-  width: 2vw;
+  width: 4vw;
 }
 
 div.info-modal {
@@ -156,8 +143,14 @@ div.info-modal {
 
 div.toggle-info-modal {
   position: absolute;
-  top: 0;
-  left: 0;
+  width: 5%;
+  top: 4px;
+  left: 4px;
+  min-width: 30px;
+}
+
+div.toggle-info-modal > img {
+  width: 100%;
 }
 
 div.settings-title {
@@ -228,4 +221,89 @@ div.tool-tip {
   background-color: var(--nav-highlight);
   border-radius: 5px;
   z-index: 4;
+}
+
+@media only screen and (max-width: 600px) {
+  div.app {
+    width: 100vw;
+    background-size: 100;
+  }
+
+  div.canvas-grid {
+    position: fixed;
+    left: -4.5%;
+  }
+
+  nav.primary-nav {
+    left: 1px;
+    top: 1px;
+    font-size: 3vw;
+    bottom: unset;
+    width: 99vw;
+    display: flex;
+  }
+  div.nav-main {
+    flex: 9;
+    flex-direction: row;
+    justify-content: space-evenly;
+  }
+
+  div.toggle-nav {
+    width: fit-content;
+  }
+
+  div.toggle-nav > img {
+    width: 10vw;
+  }
+
+  div.navicon {
+    display: inline-block;
+  }
+  div.navicon > img {
+    width: 12vw;
+    min-width: 60px;
+  }
+
+  div.info-modal {
+    top: 20%;
+    left: 10%;
+    padding: 8%;
+    width: 65%;
+  }
+
+  div.big-hex {
+    width: 68%;
+    padding: 30px;
+    top: 35%;
+    left: 14%;
+  }
+
+  .big-hex > div {
+    margin-top: 10%;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    justify-content: space-evenly;
+    font-size: 4vw;
+    gap: 10px;
+  }
+  .big-hex > h2 {
+    margin: auto;
+    font-size: 4.5vw;
+    text-align: center;
+  }
+
+  p.answer-splash {
+    font: inherit;
+    color: rgb(27, 41, 190);
+  }
+
+  div.response {
+    padding: 3px;
+    background-color: aquamarine;
+    border-radius: 10px;
+    margin: auto;
+    min-width: 3vw;
+  }
 }

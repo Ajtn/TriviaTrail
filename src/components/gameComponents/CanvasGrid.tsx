@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import "../../utility/hexUtility"; 
 import QuestionModal from "./QuestionModal";
-import '../../style/canvasStyle.css';
 import {calcHexScale, getHexCoords, getGridX, pointInsideHex, getTextOffset, checkAdjacent, formatString, isHexWinState} from "../../utility/hexUtility";
 import { ruleSet } from "../../App";
 
