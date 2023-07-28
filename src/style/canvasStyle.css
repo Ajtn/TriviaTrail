@@ -38,9 +38,9 @@ div.big-hex {
   border-radius: 30px;
   padding: 30px;
   top: 20%;
-  left: 32%;
+  left: 30%;
   background-image: linear-gradient(to bottom right,rgb(161, 33, 161), rgb(70, 189, 189), rgba(155, 192, 127, 1), rgb(117, 156, 79));
-  min-width: 20%;
+  width: 50%;
 }
 
 .big-hex > div {
@@ -305,5 +305,12 @@ div.tool-tip {
     border-radius: 10px;
     margin: auto;
     min-width: 3vw;
+  }
+}
+
+@media only screen and (max-height: 600px) {
+  div.navicon > img {
+    width: 7vw;
+    min-width: 50px;
   }
 }

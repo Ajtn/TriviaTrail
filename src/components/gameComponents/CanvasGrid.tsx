@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "../../utility/hexUtility"; 
 import QuestionModal from "./QuestionModal";
 import {calcHexScale, getHexCoords, getGridX, pointInsideHex, getTextOffset, checkAdjacent, formatString, isHexWinState} from "../../utility/hexUtility";
@@ -18,7 +18,7 @@ type question = {
     type: string;
 }
 
-type hexStatus = {
+export type hexStatus = {
     id: string;
     position: position;
     accessible: boolean;
@@ -33,7 +33,7 @@ type hexStatus = {
 
 export type activeQ = {
     visible: boolean;
-    qData: hexStatus;
+    qIndex: number;
 }
 
 type urlParams = {
@@ -74,7 +74,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
     [hexGrid, setHexGrid] = useState<hexStatus[]>([]),
     [mouseOnHex, setMouseOnHex] = useState<hexStatus | undefined>(),
     //Currently selected question and whether it's visible in pop up modal
-    [activeQ, setactiveQ] = useState<activeQ>({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: "", isGoal: false}});
+    [activeQ, setactiveQ] = useState<activeQ>({visible: false, qIndex: -1});
 
     useEffect(initTrivia, [props.reset]);
     useEffect(initHexGrid, [questions]);
@@ -83,7 +83,8 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
     useEffect(updateHexScale, [windowSize, questions]);
     useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex, props.darkMode]);
     useEffect(initMouseMoveListener, [hexScale, hexGrid, activeQ]);
-    useEffect(initMouseClickListener, [hexScale, hexGrid, activeQ, props.canClick]);
+    useEffect(initMouseClickListener, [hexScale, hexGrid, activeQ, props.canClick]),
+    useEffect(updateActive, [hexGrid]);
 
     const canvRef = useRef<HTMLCanvasElement>(null);
 
@@ -144,20 +145,20 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         if (! activeQ.visible && props.canClick) {
             const clickPos = {x: event.clientX, y: event.clientY};
             const xGrid = getGridX(clickPos.x, hexScale);
-            const xAlignedHexes: Array<hexStatus> = [];
+            const xAlignedHexes: Array<number> = [];
 
-            hexGrid.forEach(hex => {
+            hexGrid.forEach((hex, index) => {
                 if (xGrid === hex.position.xPos || xGrid === hex.position.xPos + 1) {
-                    xAlignedHexes.push(hex);
+                    xAlignedHexes.push(index);
                 }
             });
 
-            const clickedHex = xAlignedHexes.find(hex => {
-                const hexCoord = getHexCoords(hex.position, hexScale);
+            const clickedHex = xAlignedHexes.find((index) => {
+                const hexCoord = getHexCoords(hexGrid[index].position, hexScale);
                 return pointInsideHex(hexCoord, hexScale.hexSideLength, clickPos)
             });
-            if (clickedHex?.accessible) {
-                setactiveQ({visible: true, qData: clickedHex});
+            if (clickedHex !== undefined && hexGrid[clickedHex].accessible) {
+                setactiveQ({visible: true, qIndex: clickedHex});
             }
         }
     }
@@ -189,8 +190,6 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
                 }
             });
             url = url.slice(0, -1);
-            console.log(url);
-            console.log(props.api.urlParams);
         }
 
         fetch(url, {
@@ -202,20 +201,25 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         });
     }
 
+    function initHexGrid() {
+        setHexGrid(createGrid());
+        setactiveQ({visible: false, qIndex: -1});
+    }
+
+    function updateActive() {
+        setTimeout(() => {setactiveQ(oldQ => ({...oldQ, visible: false}))}, 1000);
+    }
+
     function checkFailState() {
         if (hexGrid.length > 1 && ! hexGrid.some((hex => hex.accessible))) {
             setWinstate("lose");
         }
     }
 
-    function initHexGrid() {
-        setHexGrid(createGrid());
-        setactiveQ({visible: false, qData: {id: "", position: {xPos: -1, yPos: -1}, accessible: false, category: "", answered: "unanswered", questionText: "", correctAnswer: "", difficulty: "", isGoal: false}});
-    }
 
     function resetApp() {
         initTrivia();
-        setactiveQ(oldQ => ({...oldQ, visible: false}));
+        setactiveQ({visible: false, qIndex: -1});
         setWinstate("ongoing");
     }
 
@@ -255,13 +259,13 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         canvasContext.fillStyle = tempStyle.colour;
         canvasContext.fill();
 
-
         canvasContext.font = `${hexScale.fontSize}px Georgia`;
         canvasContext.fillStyle = tempStyle.fontColour;
         const textOffset = getTextOffset(hex.category, hexScale.fontSize);
         canvasContext.fillText(hex.category, x - textOffset, y);
     }
 
+    //gets the appropriate colour scheme for a hex based on it's status and darkmode
     function getHexStyle(accessible: boolean, isGoal: boolean,answered: "pass" | "fail" | "unanswered") {
         if (answered === "pass") {
             return !props.darkMode? defaultHexStyle.pass : darkHexStyle.pass;
@@ -292,7 +296,18 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         let xPos = 0,
         yPos = 0;
         return questions.map(q => {
-            const tempHex: hexStatus = {...q, questionText: q.question.text, category: formatString(q.category), position: {xPos: xPos, yPos: yPos}, accessible: false, answered: "unanswered" as "unanswered", isGoal: false}
+            const tempHex: hexStatus = {
+                id: q.id,
+                position: {xPos: xPos, yPos: yPos},
+                accessible: false,
+                category: formatString(q.category),
+                answered: "unanswered" as "unanswered",
+                questionText: q.question.text,
+                correctAnswer: q.correctAnswer,
+                incorrectAnswers: q.incorrectAnswers,
+                difficulty: q.difficulty,
+                isGoal: false
+            }
             if (xPos + 1 < props.gameRules.rowLength) {
                 xPos++;
             } else {
@@ -309,47 +324,33 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         });
     }
 
-    //finds current question and modifies it's answered value in state
-    function answerClicked(event: React.MouseEvent<HTMLDivElement, MouseEvent>) {
-        const clickedA = event.currentTarget.outerText,
-        clickedId = event.currentTarget.parentElement?.classList[1];
-        setHexGrid(oldGrid => oldGrid.map(hex => {
-            if (hex.id === clickedId) {
-                if (clickedA === activeQ.qData.correctAnswer) {
-                    if (activeQ.qData.isGoal) {
-                        setWinstate("won");
+    //modifies state of the active hex when a response is clicked
+    function answerClicked(isCorrect: boolean) {
+        if (isCorrect) {
+            const neighbors = getNeighbors(hexGrid[activeQ.qIndex].position);
+            setHexGrid(oldGrid => {
+                return oldGrid.map((hex, index) => {
+                    if (activeQ.qIndex === index) {
+                        return {...hex, answered: "pass", accessible: false};
+                    } else if (neighbors.includes(hex.id) && hex.answered === "unanswered") {
+                        return {...hex, accessible: true};
+                    } else {
+                        return hex;
                     }
-                    setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "pass"}}));
-                    updateNeighbors(hex.position);
-                    return {...hex, answered: "pass", accessible: false};
-                } else {
-                    setactiveQ(oldActive => ({...oldActive, qData: {...oldActive.qData, answered: "fail"}}))
-                    return {...hex, answered: "fail", accessible: false};
-                }
-            } else {
-                return hex;
+                });
+            });
+            if (hexGrid[activeQ.qIndex].isGoal) {
+                setWinstate("won");
             }
-        }));
-        setTimeout(() => {setactiveQ(oldQ => ({...oldQ, visible: false}))}, 1000);
+        } else {
+            setHexGrid(oldGrid => oldGrid.map((hex, index)=> index === activeQ.qIndex ? {...hex, answered: "fail"} : hex));
+        }
     }
 
-    //modifies acessibility of hexes adjacent to position of parameter
-    function updateNeighbors(hexPos: {xPos: number, yPos: number}) {
-        const neighbors = getNeighbors(hexPos);
-        setHexGrid(oldGrid => {
-            return oldGrid.map(hex => {
-                if (neighbors.includes(hex.id) && hex.answered === "unanswered") {
-                    return {...hex, accessible: true};
-                } else {
-                    return hex;
-                }
-            })
-        });
-    }
 
     return (
         <div className="canvas-grid grid-container">
-            <QuestionModal activeQ={activeQ} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying} />
+            {(activeQ.visible || winState !== "ongoing") && <QuestionModal activeQ={hexGrid[activeQ.qIndex]} handleClick={answerClicked} winState={winState} handleReset={resetApp} handleClose={keepPlaying} />}
             <canvas className="hex-canvas" width={windowSize.width} height={windowSize.height - 4} ref={canvRef}></canvas>
         </div>
     )

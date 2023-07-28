@@ -59,7 +59,7 @@ function App() {
   //User defined parameters to modify API call to specific question types
   const [gameMode, setGameMode] = useState(0),
   [selectedCategories, setSelectedCategories] = useState([{name: "", selected: false}]),
-  [apiParameters, setApiParameters] = useState({}),
+  [apiParameters, setApiParameters] = useState({difficulties: "easy"}),
   [infoModal, setInfoModal] = useState({visible: false, mode: "dark"}),
   [darkMode, setDarkMode] = useState(false),
   [resetCount, setResetCount] = useState(0);
@@ -81,6 +81,7 @@ function App() {
     .then(data => setSelectedCategories(Object.keys(data).map(cat => ({name: cat, selected: false}))));
   }
   
+  //activate appropriate settings menu or mode when an icon is clicked
   function handleIconClick(typeClicked: "info" | "settings" | "dark") {
     if (typeClicked === "dark") {
       setDarkMode(oldVal => !oldVal);
@@ -108,10 +109,12 @@ function App() {
     setGameMode(gameModeIndex);
   }
 
+  //toggle a given category to be selected
   function categoryToggled(index: number) {
     setSelectedCategories(oldCats => oldCats.map((cat, i) => i === index ? {...cat, selected: !cat.selected} : cat));
   }
 
+  //generate a string to be used as a url parameter to request selected categories from API
   function categoriesChanged() {
     let categoryString = "";
     if (selectedCategories.some(cat => !cat.selected)) {
@@ -126,8 +129,9 @@ function App() {
   }
 
   //https://the-trivia-api.com/v2/questions
-  const apiDetails = {baseUrl: "", method: "GET", urlParams: apiParameters};
+  const apiDetails = {baseUrl: "https://the-trivia-api.com/v2/questions", method: "GET", urlParams: apiParameters};
 
+  //mode specific instructions added to general game instructions 
   const instructions = `Click/Tap hexes to answer questions and open up new hexes to solve. ${ruleOptions[gameMode].description}`;
 
   return (
