@@ -112,10 +112,10 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         }
     }
 
-    //todo: find bug that interrupts hexGrid state update
+    //highlights hexes when scrolled over
     function handleMouseMove(event: MouseEvent) {
-
-        if (false) {
+        //checks if modals are currently in use
+        if (! activeQ.visible && props.canClick) {
             const hoverPos = {x: event.clientX, y: event.clientY};
             const xGrid = getGridX(hoverPos.x, hexScale);
             const xAlignedHexes: Array<hexStatus> = [];
@@ -141,6 +141,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
         }
     }
 
+    //sets active question on click
     function handleMouseClick(event: MouseEvent) {
         if (! activeQ.visible && props.canClick) {
             const clickPos = {x: event.clientX, y: event.clientY};
@@ -173,7 +174,6 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
     function handleResize() {
         setWindowSize({width: Math.round(window.innerWidth), height: window.innerHeight});
     }
-
 
     function updateHexScale() {
         setHexScale(calcHexScale(windowSize, props.gameRules.rowLength, props.gameRules.colLength));
@@ -215,7 +215,6 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
             setWinstate("lose");
         }
     }
-
 
     function resetApp() {
         initTrivia();
@@ -343,7 +342,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
                 setWinstate("won");
             }
         } else {
-            setHexGrid(oldGrid => oldGrid.map((hex, index)=> index === activeQ.qIndex ? {...hex, answered: "fail"} : hex));
+            setHexGrid(oldGrid => oldGrid.map((hex, index)=> index === activeQ.qIndex ? {...hex, answered: "fail", accessible: false} : hex));
         }
     }
 
