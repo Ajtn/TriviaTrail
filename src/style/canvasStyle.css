@@ -10,17 +10,19 @@ div.app.lightmode {
   --nav-highlight: rgb(111, 155, 176);
   --nav-tertiary: rgb(159, 142, 141);
   --nav-text-colour: rgb(36, 34, 25);
+  --selected: wheat;
 }
+
 
 div.app.darkmode {
-  --app-background: rgb(14, 11, 22);
-  --nav-colour: rgb(162, 57,202);
-  --nav-secondary: rgb(71, 23, 246);
-  --nav-highlight: rgb(231, 223, 221);
-  --nav-tertiary: rgba(86, 70, 147, 0.526);
-  --nav-text-colour: rgb(37, 24, 1);
+  --app-background: rgb(135, 79, 128);
+  --nav-colour: rgb(132, 44, 166);
+  --nav-secondary: rgb( 101, 29, 128 );
+  --nav-highlight: rgb( 158, 124, 171 );
+  --nav-tertiary: rgba(107, 94, 118, 0.8);
+  --nav-text-colour: rgb(6, 2, 0);
+  --selected: rgb(218, 116, 199);
 }
-
 
 div.app {
   background-color: var(--app-background);
@@ -83,7 +85,7 @@ nav.primary-nav {
   background-color:var(--nav-colour);
   border-radius: 1px;
   border-style: solid;
-  border-color: rgb(150, 107, 80);
+  border-color: var(--nav-secondary);
   position: absolute;
   font-size: 1.5vw;
   z-index: 3;
@@ -200,7 +202,7 @@ div.setting-option {
 }
 
 div.setting-option.selected{
-  background-color: wheat;
+  background-color: var(--selected);
 }
 
 div.setting-option:hover {
@@ -217,13 +219,13 @@ div.tool-tip {
   padding: 5px;
   left: 120%;
   top: -60%;
-  width: 10vw;
+  width: 15vw;
   background-color: var(--nav-highlight);
   border-radius: 5px;
   z-index: 4;
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 600px), (orientation: portrait) {
   div.app {
     width: 100vw;
     background-size: 100;

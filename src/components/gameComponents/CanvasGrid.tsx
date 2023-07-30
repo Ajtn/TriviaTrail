@@ -82,7 +82,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
     useEffect(initResizeListener, [windowSize]);
     useEffect(updateHexScale, [windowSize, questions]);
     useEffect(drawGrid, [hexGrid, hexScale, mouseOnHex, props.darkMode]);
-    useEffect(initMouseMoveListener, [hexScale, hexGrid, activeQ]);
+    useEffect(initMouseMoveListener, [hexScale, hexGrid, activeQ, props.canClick]);
     useEffect(initMouseClickListener, [hexScale, hexGrid, activeQ, props.canClick]),
     useEffect(updateActive, [hexGrid]);
 
@@ -160,6 +160,7 @@ export default function CanvasGrid(props: {gameRules: ruleSet, api: apiConfig, d
             });
             if (clickedHex !== undefined && hexGrid[clickedHex].accessible) {
                 setactiveQ({visible: true, qIndex: clickedHex});
+                setMouseOnHex(undefined);
             }
         }
     }

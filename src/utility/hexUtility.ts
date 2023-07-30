@@ -27,6 +27,7 @@ export function pointInsideHex(hexPos: coordinate, hexSideL: number, pos: coordi
     return maxLength >= actualLength? true : false;
 }
 
+//Finds the x and y co ordinates for a hexes origin given it's position in the grid and the scale of the grid
 export function getHexCoords(hexGridPos: position, hexScale: hexScale) {
     const {xPos: xPos, yPos: yPos} = hexGridPos;
     const xGap = (hexScale.hexSideLength * 1.49 + hexScale.hexOffset);
@@ -44,6 +45,7 @@ export function getGridX(x: number, hexScale: hexScale) {
     return Math.ceil((x - hexScale.hexSideLength - hexScale.canvasOffset.x) / xGap);
 }
 
+//checks if two hexes are adjacent to each other given their grid positions
 export function checkAdjacent(hex1: position, hex2: position) {
     if (hex1.xPos === hex2.xPos) {
         if (hex1.yPos === hex2.yPos + 1 || hex1.yPos === hex2.yPos - 1) {
@@ -85,12 +87,18 @@ export function calcHexScale(windowSize: {width: number, height: number}, rowLen
     canvasOffset = {x: 0, y: 0};
     if (lengthH < lengthW) {
         length = lengthH;
-        canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset) / 2 + (windowSize.width * 0.06) );
-        canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength)) - offset * 2) / 4);
+        canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset) / 2 + (windowSize.width * 0.05) );
+        canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength)) - offset * 2) / 8);
     } else {
         length = lengthW;
-        canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) / 2);
-        canvasOffset.x = canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) / 2 + (windowSize.width * 0.03));
+        //navbar swaps from vertical to horizontal at 600 width different scaling ideal
+        if (windowSize.width <= 600 || window.matchMedia(("(orientation: portrait)"))) {
+            canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) * 0.75);
+            canvasOffset.x = canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) / 2 + (windowSize.width * 0.02));
+        } else {
+            canvasOffset.y = ((windowSize.height - (((length * Math.sqrt(3) + offset) * columnLength))) / 8);
+            canvasOffset.x = ((windowSize.width - (((length * 1.49 + offset) * rowLength)) - offset * 2.5) / 2 + (windowSize.width * 0.04));
+        }
     }
     const font = length / 5;
     return ({hexSideLength: length ,hexOffset: offset, fontSize: font, canvasOffset: canvasOffset});

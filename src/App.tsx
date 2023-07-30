@@ -129,7 +129,7 @@ function App() {
   }
 
   //https://the-trivia-api.com/v2/questions
-  const apiDetails = {baseUrl: "https://the-trivia-api.com/v2/questions", method: "GET", urlParams: apiParameters};
+  const apiDetails = {baseUrl: "", method: "GET", urlParams: apiParameters};
 
   //mode specific instructions added to general game instructions 
   const instructions = `Click/Tap hexes to answer questions and open up new hexes to solve. ${ruleOptions[gameMode].description}`;
